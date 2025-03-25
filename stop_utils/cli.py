@@ -115,7 +115,7 @@ def run_analysis(
         # Print summary
         console.print("\n[green]Analysis complete![/green]")
         console.print(f"RMS residual error: {result.rms_error():.2f} nm")
-        console.print(f"Peak-to-valley: {result.peak_to_valley():.2f} nm")
+        console.print(f"PTP residual error: {result.peak_to_valley():.2f} nm")
 
         if config.generate_plots:
             console.print(f"\nPlots saved in: {output_dir}")
