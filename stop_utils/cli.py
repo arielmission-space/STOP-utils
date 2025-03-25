@@ -8,6 +8,7 @@ import numpy as np
 import typer
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
 from .types import AnalysisConfig
 from .visualization import generate_plots
@@ -15,17 +16,29 @@ from .wfe_analysis import analyze_wfe_data
 
 # Create console for output
 console = Console()
+def create_coefficients_table(coefficients: List[float]) -> Table:
+    """Create a rich table displaying Zernike orthonormal coefficients."""
+    table = Table(title="Zernike Orthonormal Coefficients")
+    table.add_column("Mode", justify="center", style="cyan")
+    table.add_column("Coefficient (nm)", justify="right", style="green")
+    
+    for i, coeff in enumerate(coefficients):
+        table.add_row(str(i), f"{coeff:.3f}")
+    
+    return table
 
 
 def save_coefficients(output_dir: Path, coefficients: List[float]) -> None:
-    """Save Zernike coefficients to JSON file."""
-    coeff_file = output_dir / "zernike_coefficients.json"
+    """Save Zernike orthonormal coefficients to JSON file."""
+    coeff_file = output_dir / "zernike_orthonormal_coefficients.json"
     with open(coeff_file, "w") as f:
         json.dump(
             {"coefficients": [float(c) for c in coefficients], "units": "nm"},
             f,
             indent=2,
         )
+
+
 
 
 def validate_plot_format(value: str) -> str:
@@ -114,14 +127,20 @@ def run_analysis(
 
         # Print summary
         console.print("\n[green]Analysis complete![/green]")
-        console.print(f"RMS residual error: {result.rms_error():.2f} nm")
+        
+        # Display coefficients table
+        coeff_list = [float(c) for c in result.coefficients]
+        console.print(create_coefficients_table(coeff_list))
+        
+        # Print metrics
+        console.print(f"\nRMS residual error: {result.rms_error():.2f} nm")
         console.print(f"PTP residual error: {result.peak_to_valley():.2f} nm")
 
         if config.generate_plots:
             console.print(f"\nPlots saved in: {output_dir}")
         if config.save_coeffs:
             console.print(
-                f"Coefficients saved in: {output_dir}/zernike_coefficients.json"
+                f"Coefficients saved in: {output_dir}/zernike_orthonormal_coefficients.json"
             )
 
     except typer.Exit:
@@ -148,7 +167,7 @@ def callback() -> None:
     Wavefront Error Analysis Tools - Analyze and visualize wavefront error data.
 
     This tool provides functionality for analyzing wavefront error data using
-    Zernike polynomial decomposition and generating visualization outputs.
+    Zernike orthornormal polynomial decomposition and generating visualization outputs.
     """
     pass
 
@@ -162,7 +181,7 @@ def analyze(
         ..., file_okay=False, dir_okay=True, help="Output directory for results"
     ),
     n_zernike: int = typer.Option(
-        15, "--nzernike", "-n", min=1, help="Number of Zernike polynomials"
+        15, "--nzernike", "-n", min=1, help="Number of Zernike orthonormal polynomials"
     ),
     plot_format: str = typer.Option(
         "png",
@@ -172,13 +191,13 @@ def analyze(
         help="Plot output format (png, pdf, svg)",
     ),
     save_coeffs: bool = typer.Option(
-        True, "--save-coeffs/--no-save-coeffs", help="Save Zernike coefficients to JSON"
+        True, "--save-coeffs/--no-save-coeffs", help="Save Zernike orthonormal coefficients to JSON"
     ),
     no_plots: bool = typer.Option(False, help="Skip plot generation"),
 ) -> None:
     """Analyze WFE data and generate results.
 
-    This command loads WFE data, performs Zernike polynomial decomposition,
+    This command loads WFE data, performs Zernike orthonormal polynomial decomposition,
     and generates visualization outputs.
     """
     run_analysis(

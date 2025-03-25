@@ -143,7 +143,7 @@ def generate_plots(
     plot_wfe_data(
         result.model,
         aperture=aperture,
-        title="Zernike Model Fit",
+        title="Orthonormal Zernike Model Fit",
         output_path=output_dir / f"wfe_model.{format}",
         zoom=zoom,
     )
@@ -160,10 +160,10 @@ def generate_plots(
     # Coefficient plot
     plt.figure(figsize=(12, 6))
     plt.bar(range(len(result.coefficients)), result.coefficients)
-    plt.xlabel("Zernike Mode")
+    plt.xlabel("Orthonormal Zernike Mode")
     plt.ylabel("Coefficient (nm)")
-    plt.title("Zernike Coefficients")
+    plt.title("Orthonormal Zernike Coefficients")
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(output_dir / f"zernike_coefficients.{format}")
+    plt.savefig(output_dir / f"zernike_orthonormal_coefficients.{format}")
     plt.close()
