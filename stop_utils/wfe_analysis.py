@@ -9,13 +9,20 @@ from paos.classes.zernike import PolyOrthoNorm
 from photutils.aperture import EllipticalAperture
 from skimage.measure import label, regionprops
 
+from . import logger
 from .types import EllipticalParams, WFEResult
+
+# Set logger context for analysis module
+logger = logger.bind(context="wfe_analysis")
 
 
 def load_wfe_data(file_path: Path) -> npt.NDArray[np.float64]:
     """Load WFE data from file and convert to nanometers."""
+    logger.debug(f"Loading WFE data from {file_path}")
     data = np.loadtxt(file_path)
-    return data * 1e9  # Convert to nm
+    data_nm = data * 1e9  # Convert to nm
+    logger.debug(f"Loaded data shape: {data_nm.shape}, range: [{data_nm.min():.2f}, {data_nm.max():.2f}] nm")
+    return data_nm
 
 
 def mask_to_elliptical_aperture(
@@ -74,9 +81,11 @@ def calculate_zernike(
         data=np.sqrt(yy**2 + xx**2), mask=pupil_mask, fill_value=0.0
     )
 
+    logger.debug(f"Calculating {n_zernike} Zernike polynomials")
     poly = PolyOrthoNorm(n_zernike, rho, phi, normalize=False, ordering="standard")
     zkm = poly()
     A = poly.cov()
+    logger.debug("Zernike polynomials calculated")
 
     return zkm, A
 
@@ -109,9 +118,11 @@ def fit_zernike(
     )
 
     # Calculate Zernike polynomials
+    logger.debug(f"Fitting {n_zernike} Zernike polynomials to WFE data")
     zkm, A = calculate_zernike(pupil_mask, x, y, n_zernike)
     B = np.ma.mean(zkm * masked_error, axis=(-2, -1))
     coeff = np.linalg.lstsq(A, B, rcond=-1)[0]
+    logger.debug("Zernike polynomial fitting completed")
 
     # Calculate model using computed coefficients
     model = np.sum(coeff.reshape(-1, 1, 1) * zkm, axis=0)
@@ -146,12 +157,16 @@ def analyze_wfe_data(
         raise FileNotFoundError(f"WFE data file not found: {wfe_file}")
 
     # Load and preprocess data
+    logger.info(f"Analyzing WFE data from {wfe_file}")
     errormap = load_wfe_data(wfe_file)
     errormap_ma = np.ma.masked_where(errormap == 0, errormap)
 
     # Create mask and find elliptical aperture
+    logger.debug("Creating elliptical aperture mask")
     mask = label(~errormap_ma.mask)
     aperture, params = mask_to_elliptical_aperture(mask)
+    logger.debug(f"Elliptical aperture found: center=({params.x0:.1f}, {params.y0:.1f}), "
+               f"axes=({params.a:.1f}, {params.b:.1f}), theta={params.theta:.3f}")
 
     # Create normalized coordinates
     shape = errormap.shape
@@ -163,4 +178,5 @@ def analyze_wfe_data(
         errormap=errormap, pupil_mask=~mask.astype(bool), x=x, y=y, n_zernike=n_zernike
     )
 
+    logger.info(f"Analysis complete - RMS error: {result.rms_error():.2f} nm")
     return result, params

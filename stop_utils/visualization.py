@@ -8,7 +8,11 @@ import numpy as np
 import numpy.typing as npt
 from photutils.aperture import EllipticalAperture
 
+from . import logger
 from .types import EllipticalParams, WFEResult
+
+# Set logger context for visualization module
+logger = logger.bind(context="visualization")
 
 
 def plotlim(s: int, zoom: int) -> Tuple[int, int]:
@@ -78,14 +82,18 @@ def plot_wfe_data(
         cmap: Matplotlib colormap name
     """
     fig, ax = setup_wfe_plot(data, title, zoom=zoom, cmap=cmap)
+    logger.debug(f"Created plot with zoom={zoom}, cmap={cmap}")
 
     if aperture is not None:
         aperture.plot(ax=ax, color="red", lw=2)
+        logger.debug("Added aperture overlay")
 
     if output_path is not None:
+        logger.debug(f"Saving plot to {output_path}")
         plt.savefig(output_path)
         plt.close(fig)
     else:
+        logger.debug("Displaying plot")
         plt.show()
 
 
@@ -105,10 +113,13 @@ def generate_plots(
         format: Output format (png, pdf, or svg)
         zoom: Zoom factor for display
     """
+    logger.info(f"Generating plots in {output_dir} with format={format}")
     output_dir.mkdir(parents=True, exist_ok=True)
     aperture = EllipticalAperture(
         (params.x0, params.y0), params.a, params.b, theta=params.theta
     )
+    logger.debug(f"Created aperture: center=({params.x0:.1f}, {params.y0:.1f}), "
+               f"axes=({params.a:.1f}, {params.b:.1f}), theta={params.theta:.3f}")
 
     # Raw WFE map
     plot_wfe_data(
@@ -154,5 +165,9 @@ def generate_plots(
     plt.title("Orthonormal Zernike Coefficients")
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(output_dir / f"zernike_orthonormal_coefficients.{format}")
+    coeff_plot = output_dir / f"zernike_orthonormal_coefficients.{format}"
+    logger.debug(f"Saving coefficient plot to {coeff_plot}")
+    plt.savefig(coeff_plot)
     plt.close()
+    
+    logger.info("All plots generated successfully")

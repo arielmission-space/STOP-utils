@@ -9,32 +9,33 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
-from . import __version__
+from . import __version__, logger
 from .types import AnalysisConfig
 from .visualization import generate_plots
 from .wfe_analysis import analyze_wfe_data
 
+# Set logger context for CLI
+logger = logger.bind(context="cli")
+
 def version_callback(value: bool) -> None:
     """Show version and exit."""
     if value:
-        console.print(f"stop-utils version {__version__}")
+        logger.info(f"stop-utils version {__version__}")
         raise typer.Exit()
 
 # Create console for output
 console = Console()
-
 
 def create_coefficients_table(coefficients: List[float]) -> Table:
     """Create a rich table displaying Zernike orthonormal coefficients."""
     table = Table(title="Zernike Orthonormal Coefficients")
     table.add_column("Mode", justify="center", style="cyan")
     table.add_column("Coefficient (nm)", justify="right", style="green")
-
+    
     for i, coeff in enumerate(coefficients):
         table.add_row(str(i), f"{coeff:.3f}")
-
+    
     return table
-
 
 def save_coefficients(output_dir: Path, coefficients: List[float]) -> None:
     """Save Zernike orthonormal coefficients to JSON file."""
@@ -46,13 +47,11 @@ def save_coefficients(output_dir: Path, coefficients: List[float]) -> None:
             indent=2,
         )
 
-
 def validate_plot_format(value: str) -> str:
     """Validate plot format option."""
     if value not in ["png", "pdf", "svg"]:
         raise typer.BadParameter("Plot format must be one of: png, pdf, svg")
     return value
-
 
 def run_analysis(
     input_file: Path,
@@ -68,9 +67,7 @@ def run_analysis(
         try:
             output_dir.mkdir(parents=True, exist_ok=True)
         except Exception as e:
-            console.print(
-                f"[red]Error:[/red] Failed to create output directory: {str(e)}"
-            )
+            logger.error(f"Failed to create output directory: {e}")
             raise typer.Exit(1)
 
         # Create configuration
@@ -84,40 +81,39 @@ def run_analysis(
 
         with Progress(
             SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
+            TextColumn("{task.description}"),
             console=console,
+            transient=True,  # Remove finished tasks
         ) as progress:
             # Analyze WFE data
             try:
-                task_id = progress.add_task("Analyzing WFE data...", total=None)
+                task_id = progress.add_task("Analyzing...", total=None)
                 result, params = analyze_wfe_data(
                     wfe_file=input_file, n_zernike=config.n_zernike
                 )
                 progress.remove_task(task_id)
             except FileNotFoundError:
-                console.print(f"[red]Error:[/red] Input file not found: {input_file}")
+                logger.error(f"Input file not found: {input_file}")
                 raise typer.Exit(1)
             except Exception as e:
-                console.print(f"[red]Error:[/red] Analysis failed: {str(e)}")
+                logger.error(f"Analysis failed: {e}")
                 raise typer.Exit(1)
 
             # Save coefficients if requested
             if config.save_coeffs:
                 try:
-                    task_id = progress.add_task("Saving coefficients...", total=None)
+                    task_id = progress.add_task("Saving...", total=None)
                     coeff_list = [float(c) for c in result.coefficients]
                     save_coefficients(config.output_dir, coeff_list)
                     progress.remove_task(task_id)
                 except Exception as e:
-                    console.print(
-                        f"[red]Error:[/red] Failed to save coefficients: {str(e)}"
-                    )
+                    logger.error(f"Failed to save coefficients: {e}")
                     raise typer.Exit(1)
 
             # Generate plots if requested
             if config.generate_plots:
                 try:
-                    task_id = progress.add_task("Generating plots...", total=None)
+                    task_id = progress.add_task("Plotting....", total=None)
                     generate_plots(
                         result=result,
                         params=params,
@@ -126,35 +122,37 @@ def run_analysis(
                     )
                     progress.remove_task(task_id)
                 except Exception as e:
-                    console.print(
-                        f"[red]Error:[/red] Failed to generate plots: {str(e)}"
-                    )
+                    logger.error(f"Failed to generate plots: {e}")
                     raise typer.Exit(1)
 
-        # Print summary
+        # Display results summary (order matters for test compatibility)
         console.print("\n[green]Analysis complete![/green]")
+        logger.success("Analysis completed successfully")
 
         # Display coefficients table
         coeff_list = [float(c) for c in result.coefficients]
         console.print(create_coefficients_table(coeff_list))
-
-        # Print metrics
-        console.print(f"\nRMS residual error: {result.rms_error():.2f} nm")
-        console.print(f"PTP residual error: {result.peak_to_valley():.2f} nm")
-
-        if config.generate_plots:
-            console.print(f"\nPlots saved in: {output_dir}")
-        if config.save_coeffs:
-            console.print(
-                f"Coefficients saved in: {output_dir}/zernike_orthonormal_coefficients.json"
-            )
+        
+        # Log metrics and output locations
+        logger.info(
+            "Results:\n"
+            f"  RMS residual error: {result.rms_error():.2f} nm\n"
+            f"  PTP residual error: {result.peak_to_valley():.2f} nm"
+        )
+        
+        if config.generate_plots or config.save_coeffs:
+            outputs = []
+            if config.generate_plots:
+                outputs.append(f"  Plots: {output_dir}")
+            if config.save_coeffs:
+                outputs.append(f"  Coefficients: {output_dir}/zernike_orthonormal_coefficients.json")
+            logger.info("Output files:\n" + "\n".join(outputs))
 
     except typer.Exit:
         raise
     except Exception as e:
-        console.print(f"[red]Error:[/red] Unexpected error: {str(e)}")
+        logger.error(f"Unexpected error: {e}")
         raise typer.Exit(1)
-
 
 # Create the Typer app
 app = typer.Typer(
@@ -185,25 +183,6 @@ def callback(
     """
     pass
 
-@app.callback()
-def callback(
-    version: bool = typer.Option(
-        None,
-        "--version",
-        "-v",
-        help="Show version and exit",
-        callback=version_callback,
-        is_eager=True,
-    )
-) -> None:
-    """
-    Wavefront Error Analysis Tools - Analyze and visualize wavefront error data.
-
-    This tool provides functionality for analyzing wavefront error data using
-    Zernike orthornormal polynomial decomposition and generating visualization outputs.
-    """
-
-
 @app.command()
 def analyze(
     input_file: Path = typer.Argument(
@@ -229,11 +208,7 @@ def analyze(
     ),
     no_plots: bool = typer.Option(False, help="Skip plot generation"),
 ) -> None:
-    """Analyze WFE data and generate results.
-
-    This command loads WFE data, performs Zernike orthonormal polynomial decomposition,
-    and generates visualization outputs.
-    """
+    """Analyze WFE data and generate results."""
     run_analysis(
         input_file=input_file,
         output_dir=output_dir,
@@ -243,11 +218,9 @@ def analyze(
         no_plots=no_plots,
     )
 
-
 def main() -> None:
     """Main entry point for the CLI."""
     app()
-
 
 if __name__ == "__main__":
     main()
