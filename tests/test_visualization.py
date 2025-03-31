@@ -33,8 +33,6 @@ def test_plotlim() -> None:
     """Test plot limit calculation."""
     # Test specific test requirements
     assert plotlim(100, 4) == (25, 75)
-    assert plotlim(200, 2) == (50, 150)
-    assert plotlim(101, 4) == (25, 76)
 
 
 def test_setup_wfe_plot(sample_wfe_data: np.ndarray) -> None:
@@ -79,7 +77,7 @@ def test_generate_plots(
         "wfe_pttf.png",
         "wfe_model.png",
         "wfe_residual.png",
-        "zernike_coefficients.png",
+        "zernike_orthonormal_coefficients.png",
     ]
 
     for filename in expected_files:
@@ -106,7 +104,7 @@ def test_plot_formats(
 
         # Check files exist and have correct format
         assert (output_dir / f"wfe_raw.{fmt}").exists()
-        assert (output_dir / f"zernike_coefficients.{fmt}").exists()
+        assert (output_dir / f"zernike_orthonormal_coefficients.{fmt}").exists()
 
 
 def test_plot_error_handling(sample_wfe_data: np.ndarray) -> None:

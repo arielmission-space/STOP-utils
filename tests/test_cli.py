@@ -26,7 +26,7 @@ def test_analyze_wfe_basic(sample_wfe_file: Path, temp_output_dir: Path) -> None
 
     # Check output files
     assert (temp_output_dir / "wfe_raw.png").exists()
-    assert (temp_output_dir / "zernike_coefficients.json").exists()
+    assert (temp_output_dir / "zernike_orthonormal_coefficients.json").exists()
 
 
 def test_analyze_wfe_no_plots(sample_wfe_file: Path, temp_output_dir: Path) -> None:
@@ -38,7 +38,7 @@ def test_analyze_wfe_no_plots(sample_wfe_file: Path, temp_output_dir: Path) -> N
     )
 
     assert result.exit_code == 0
-    assert (temp_output_dir / "zernike_coefficients.json").exists()
+    assert (temp_output_dir / "zernike_orthonormal_coefficients.json").exists()
     assert not (temp_output_dir / "wfe_raw.png").exists()
 
 
@@ -69,7 +69,7 @@ def test_analyze_wfe_custom_zernike(
     assert result.exit_code == 0
 
     # Check coefficient count
-    coeff_file = temp_output_dir / "zernike_coefficients.json"
+    coeff_file = temp_output_dir / "zernike_orthonormal_coefficients.json"
     with open(coeff_file) as f:
         data = json.load(f)
         assert len(data["coefficients"]) == 20
@@ -84,7 +84,7 @@ def test_analyze_wfe_no_coeffs(sample_wfe_file: Path, temp_output_dir: Path) -> 
     )
 
     assert result.exit_code == 0
-    assert not (temp_output_dir / "zernike_coefficients.json").exists()
+    assert not (temp_output_dir / "zernike_orthonormal_coefficients.json").exists()
 
 
 def test_analyze_wfe_invalid_input() -> None:
