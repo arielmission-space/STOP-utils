@@ -81,13 +81,13 @@ def run_analysis(
 
         with Progress(
             SpinnerColumn(),
-            TextColumn("{task.description}"),
+            TextColumn(" {task.description:<12}"),  # Left-aligned, fixed width, no dots
             console=console,
-            transient=True,  # Remove finished tasks
+            transient=False,  # Keep tasks visible for better feedback
         ) as progress:
             # Analyze WFE data
             try:
-                task_id = progress.add_task("Analyzing...", total=None)
+                task_id = progress.add_task("Analyzing", total=None)
                 result, params = analyze_wfe_data(
                     wfe_file=input_file, n_zernike=config.n_zernike
                 )
@@ -102,7 +102,7 @@ def run_analysis(
             # Save coefficients if requested
             if config.save_coeffs:
                 try:
-                    task_id = progress.add_task("Saving...", total=None)
+                    task_id = progress.add_task("Saving", total=None)
                     coeff_list = [float(c) for c in result.coefficients]
                     save_coefficients(config.output_dir, coeff_list)
                     progress.remove_task(task_id)
@@ -113,7 +113,7 @@ def run_analysis(
             # Generate plots if requested
             if config.generate_plots:
                 try:
-                    task_id = progress.add_task("Plotting....", total=None)
+                    task_id = progress.add_task("Plotting", total=None)
                     generate_plots(
                         result=result,
                         params=params,
