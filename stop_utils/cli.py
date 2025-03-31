@@ -2,9 +2,8 @@
 
 import json
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
-import numpy as np
 import typer
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn

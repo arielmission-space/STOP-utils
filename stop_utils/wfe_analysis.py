@@ -1,7 +1,7 @@
 """Core functionality for Wavefront Error analysis."""
 
 from pathlib import Path
-from typing import Any, Tuple, Union
+from typing import Tuple
 
 import numpy as np
 import numpy.typing as npt

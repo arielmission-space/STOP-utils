@@ -1,7 +1,6 @@
 """Tests for visualization functionality."""
 
 from pathlib import Path
-from typing import Tuple, cast
 
 import matplotlib.pyplot as plt
 import numpy as np

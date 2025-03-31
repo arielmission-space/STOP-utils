@@ -1,15 +1,12 @@
 """Tests for WFE analysis functionality."""
 
 from pathlib import Path
-from typing import Tuple, cast
 
 import numpy as np
 import numpy.typing as npt
 import pytest
 from paos.classes.zernike import PolyOrthoNorm
 from photutils.aperture import EllipticalAperture
-
-from stop_utils.types import WFEResult
 from stop_utils.wfe_analysis import (
     analyze_wfe_data,
     calculate_zernike,

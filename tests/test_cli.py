@@ -2,9 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import cast
 
-import pytest
 from typer.testing import CliRunner
 
 from stop_utils.cli import app
