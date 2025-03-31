@@ -7,8 +7,12 @@ import numpy as np
 import pytest
 
 from stop_utils.types import EllipticalParams, WFEResult
-from stop_utils.visualization import (generate_plots, plot_wfe_data, plotlim,
-                                      setup_wfe_plot)
+from stop_utils.visualization import (
+    generate_plots,
+    plot_wfe_data,
+    plotlim,
+    setup_wfe_plot,
+)
 
 
 @pytest.fixture

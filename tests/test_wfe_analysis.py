@@ -3,10 +3,12 @@
 from pathlib import Path
 
 import numpy as np
+import numpy.ma as ma
 import numpy.typing as npt
 import pytest
 from paos.classes.zernike import PolyOrthoNorm
 from photutils.aperture import EllipticalAperture
+
 from stop_utils.wfe_analysis import (
     analyze_wfe_data,
     calculate_zernike,
@@ -162,7 +164,9 @@ def test_zernike_fitting_roundtrip(
     x = (x_coords - x0) / a
     y = (y_coords - y0) / a
     xx, yy = np.meshgrid(x, y)
-    rho = np.ma.masked_array(data=np.sqrt(xx**2 + yy**2), mask=pupil_mask)
+    rho: ma.MaskedArray = np.ma.masked_array(
+        data=np.sqrt(xx**2 + yy**2), mask=pupil_mask
+    )
     phi = np.arctan2(yy, xx)
 
     # 3. Generate random coefficients
@@ -179,7 +183,9 @@ def test_zernike_fitting_roundtrip(
     )
     zkm = poly()
     true_wfe_map = np.sum(input_coefficients.reshape(-1, 1, 1) * zkm, axis=0)
-    true_wfe_map_masked = np.ma.masked_array(true_wfe_map, mask=pupil_mask)
+    true_wfe_map_masked: ma.MaskedArray = np.ma.masked_array(
+        true_wfe_map, mask=pupil_mask
+    )
 
     # 5. Fit the generated WFE map
     result = fit_zernike(

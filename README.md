@@ -8,6 +8,12 @@ This package provides utilities for Wavefront Error (WFE) analysis, implementing
 
 ## Installation
 
+Using make:
+```bash
+make install
+```
+
+Or directly with poetry:
 ```bash
 poetry install
 ```
@@ -112,30 +118,39 @@ The tool generates several outputs in the specified directory:
 
 ## Development
 
-1. Environment Setup:
+The project includes a Makefile to streamline common development tasks:
 
-   ```bash
-   poetry install
-   ```
+```bash
+make help         # Show available commands
+make install      # Install dependencies using poetry
+make test         # Run the test suite
+make check        # Run type checking with mypy
+make format       # Format code with black and isort
+make clean        # Remove Python cache files and build artifacts
+```
 
-2. Run tests:
+Example workflow:
 
-   ```bash
-   poetry run pytest
-   ```
+1. Set up development environment:
+    ```bash
+    make install
+    ```
 
-3. Check types:
+2. Make your changes and format the code:
+    ```bash
+    make format
+    ```
 
-   ```bash
-   poetry run mypy .
-   ```
+3. Run type checking and tests:
+    ```bash
+    make check
+    make test
+    ```
 
-4. Format code:
-
-   ```bash
-   poetry run black .
-   poetry run isort .
-   ```
+4. Clean up before committing:
+    ```bash
+    make clean
+    ```
 
 ## Implementation Notes
 

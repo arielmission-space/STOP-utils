@@ -22,7 +22,9 @@ def plotlim(s: int, zoom: int) -> Tuple[int, int]:
         tuple: (min_limit, max_limit)
     """
     center = s // 2
-    half_range = s // zoom  # Calculate half_range based on zoom factor to match test expectations
+    half_range = (
+        s // zoom
+    )  # Calculate half_range based on zoom factor to match test expectations
     return (center - half_range, center + half_range + (s % 2))
 
 

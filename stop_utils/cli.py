@@ -15,15 +15,17 @@ from .wfe_analysis import analyze_wfe_data
 
 # Create console for output
 console = Console()
+
+
 def create_coefficients_table(coefficients: List[float]) -> Table:
     """Create a rich table displaying Zernike orthonormal coefficients."""
     table = Table(title="Zernike Orthonormal Coefficients")
     table.add_column("Mode", justify="center", style="cyan")
     table.add_column("Coefficient (nm)", justify="right", style="green")
-    
+
     for i, coeff in enumerate(coefficients):
         table.add_row(str(i), f"{coeff:.3f}")
-    
+
     return table
 
 
@@ -36,8 +38,6 @@ def save_coefficients(output_dir: Path, coefficients: List[float]) -> None:
             f,
             indent=2,
         )
-
-
 
 
 def validate_plot_format(value: str) -> str:
@@ -126,11 +126,11 @@ def run_analysis(
 
         # Print summary
         console.print("\n[green]Analysis complete![/green]")
-        
+
         # Display coefficients table
         coeff_list = [float(c) for c in result.coefficients]
         console.print(create_coefficients_table(coeff_list))
-        
+
         # Print metrics
         console.print(f"\nRMS residual error: {result.rms_error():.2f} nm")
         console.print(f"PTP residual error: {result.peak_to_valley():.2f} nm")
@@ -190,7 +190,9 @@ def analyze(
         help="Plot output format (png, pdf, svg)",
     ),
     save_coeffs: bool = typer.Option(
-        True, "--save-coeffs/--no-save-coeffs", help="Save Zernike orthonormal coefficients to JSON"
+        True,
+        "--save-coeffs/--no-save-coeffs",
+        help="Save Zernike orthonormal coefficients to JSON",
     ),
     no_plots: bool = typer.Option(False, help="Skip plot generation"),
 ) -> None:
