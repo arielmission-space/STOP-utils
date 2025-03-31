@@ -183,3 +183,25 @@ Example workflow:
    - Efficient numpy operations
    - Progress tracking for long operations
    - Optional plot generation
+
+## Cite as
+```bibtex
+@INPROCEEDINGS{2024SPIE13092E..4KB,
+       author = {{Bocchieri}, Andrea and {Mugnai}, Lorenzo V. and {Pascale}, Enzo},
+        title = "{PAOS: a fast, modern, and reliable Python package for physical optics studies}",
+    booktitle = {Space Telescopes and Instrumentation 2024: Optical, Infrared, and Millimeter Wave},
+         year = 2024,
+       editor = {{Coyle}, Laura E. and {Matsuura}, Shuji and {Perrin}, Marshall D.},
+       series = {Society of Photo-Optical Instrumentation Engineers (SPIE) Conference Series},
+       volume = {13092},
+        month = aug,
+          eid = {130924K},
+        pages = {130924K},
+          doi = {10.1117/12.3018333},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2024SPIE13092E..4KB},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+```
+
+## License
+This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for details.
