@@ -168,10 +168,8 @@ def test_zernike_fitting_roundtrip(
     rho = np.ma.masked_array(data=np.sqrt(xx**2 + yy**2), mask=pupil_mask)
     phi = np.arctan2(yy, xx)
 
-    # 3. Generate random coefficients with controlled magnitudes
-    # Higher order terms typically have smaller magnitudes
-    magnitudes = np.exp(-np.arange(n_zernike) / 5)  # Exponential decay
-    input_coefficients = np.random.normal(0, 1, n_zernike) * magnitudes * 500
+    # 3. Generate random coefficients
+    input_coefficients = np.random.normal(0, 1, n_zernike) * 500
 
     # 4. Generate the "true" WFE map using PolyOrthoNorm
     poly = PolyOrthoNorm(
