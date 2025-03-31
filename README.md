@@ -93,11 +93,13 @@ Options:
 - `--plot-format`, `-f`: Plot output format (png, pdf, svg) (default: png)
 - `--save-coeffs/--no-save-coeffs`: Save Zernike coefficients to JSON
 - `--no-plots`: Skip plot generation
+- `--help`, `-h`: Show help message
+- `--version`, `-v`: Show version information
 
 Example usage:
 
 ```bash
-stop-utils analyze wfe.dat results/ --nzernike 20 --plot-format pdf --save-coeffs
+stop-utils analyze wfe.dat results/ --nzernike 21 --plot-format pdf --save-coeffs
 ```
 
 ## Outputs

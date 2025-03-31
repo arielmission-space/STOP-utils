@@ -9,9 +9,16 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
+from . import __version__
 from .types import AnalysisConfig
 from .visualization import generate_plots
 from .wfe_analysis import analyze_wfe_data
+
+def version_callback(value: bool) -> None:
+    """Show version and exit."""
+    if value:
+        console.print(f"stop-utils version {__version__}")
+        raise typer.Exit()
 
 # Create console for output
 console = Console()
@@ -159,9 +166,17 @@ app = typer.Typer(
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 
-
 @app.callback()
-def callback() -> None:
+def callback(
+    version: bool = typer.Option(
+        None,
+        "--version",
+        "-v",
+        help="Show version and exit",
+        callback=version_callback,
+        is_eager=True,
+    )
+) -> None:
     """
     Wavefront Error Analysis Tools - Analyze and visualize wavefront error data.
 
@@ -169,6 +184,24 @@ def callback() -> None:
     Zernike orthornormal polynomial decomposition and generating visualization outputs.
     """
     pass
+
+@app.callback()
+def callback(
+    version: bool = typer.Option(
+        None,
+        "--version",
+        "-v",
+        help="Show version and exit",
+        callback=version_callback,
+        is_eager=True,
+    )
+) -> None:
+    """
+    Wavefront Error Analysis Tools - Analyze and visualize wavefront error data.
+
+    This tool provides functionality for analyzing wavefront error data using
+    Zernike orthornormal polynomial decomposition and generating visualization outputs.
+    """
 
 
 @app.command()

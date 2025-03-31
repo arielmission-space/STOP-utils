@@ -11,6 +11,9 @@ help:
 install:
 	poetry install
 
+version:
+	@echo "Current version: $(shell poetry version --short)"
+
 test:
 	poetry run pytest
 
