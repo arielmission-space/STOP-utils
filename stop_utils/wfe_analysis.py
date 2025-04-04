@@ -21,7 +21,9 @@ def load_wfe_data(file_path: Path) -> npt.NDArray[np.float64]:
     logger.debug(f"Loading WFE data from {file_path}")
     data = np.loadtxt(file_path)
     data_nm = data * 1e9  # Convert to nm
-    logger.debug(f"Loaded data shape: {data_nm.shape}, range: [{data_nm.min():.2f}, {data_nm.max():.2f}] nm")
+    logger.debug(
+        f"Loaded data shape: {data_nm.shape}, range: [{data_nm.min():.2f}, {data_nm.max():.2f}] nm"
+    )
     return data_nm
 
 
@@ -58,22 +60,22 @@ def mask_to_elliptical_aperture(
     return aperture, params
 
 
-def calculate_zernike(
+def calculate_polynomials(
     pupil_mask: npt.NDArray[np.bool_],
     x: npt.NDArray[np.float64],
     y: npt.NDArray[np.float64],
-    n_zernike: int = 15,
+    n_polynomials: int = 15,
 ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-    """Calculate Zernike polynomials for given coordinates.
+    """Calculate orthonormal polynomials for given coordinates.
 
     Args:
         pupil_mask: Boolean mask array
         x: X coordinates array
         y: Y coordinates array
-        n_zernike: Number of Zernike polynomials to calculate
+        n_polynomials: Number of polynomials to calculate
 
     Returns:
-        tuple: (Zernike polynomials array, Covariance matrix)
+        tuple: (Orthonormal polynomials array, Covariance matrix)
     """
     xx, yy = np.meshgrid(x, y)
     phi = np.arctan2(yy, xx)
@@ -81,34 +83,35 @@ def calculate_zernike(
         data=np.sqrt(yy**2 + xx**2), mask=pupil_mask, fill_value=0.0
     )
 
-    logger.debug(f"Calculating {n_zernike} Zernike polynomials")
-    poly = PolyOrthoNorm(n_zernike, rho, phi, normalize=False, ordering="standard")
-    zkm = poly()
+    logger.debug(f"Calculating {n_polynomials} orthonormal polynomials")
+    poly = PolyOrthoNorm(n_polynomials, rho, phi, normalize=False, ordering="standard")
+    polys = poly()
     A = poly.cov()
-    logger.debug("Zernike polynomials calculated")
+    logger.debug("Orthonormal polynomials calculated")
 
-    return zkm, A
+    return poly, A
 
 
-def fit_zernike(
+def fit_polynomials(
     errormap: npt.NDArray[np.float64],
     pupil_mask: npt.NDArray[np.bool_],
     x: npt.NDArray[np.float64],
     y: npt.NDArray[np.float64],
-    n_zernike: int = 15,
+    n_polynomials: int = 15,
 ) -> WFEResult:
-    """Fit Zernike polynomials to WFE data.
+    """Fit orthonormal polynomials to WFE data.
 
     Args:
         errormap: Wavefront error data array
         pupil_mask: Boolean mask array
         x: X coordinates array
         y: Y coordinates array
-        n_zernike: Number of Zernike polynomials to use
+        n_polynomials: Number of orthonormal polynomials to use
 
     Returns:
         WFEResult object containing:
-        - coefficients: Fitted Zernike coefficients
+        - coefficients: Fitted orthonormal polynomial coefficients
+        - zernikes: Zernike polynomial coefficients (after removing first 3 terms from the orthonormal fit)
         - PTTF component map
         - Complete model map
         - Residual error map
@@ -117,34 +120,43 @@ def fit_zernike(
         errormap, mask=pupil_mask
     )
 
-    # Calculate Zernike polynomials
-    logger.debug(f"Fitting {n_zernike} Zernike polynomials to WFE data")
-    zkm, A = calculate_zernike(pupil_mask, x, y, n_zernike)
-    B = np.ma.mean(zkm * masked_error, axis=(-2, -1))
+    # Calculate orthonormal polynomials
+    logger.debug(f"Fitting {n_polynomials} orthonormal polynomials to WFE data")
+    poly, A = calculate_polynomials(pupil_mask, x, y, n_polynomials)
+    polys = poly()
+    B = np.ma.mean(polys * masked_error, axis=(-2, -1))
     coeff = np.linalg.lstsq(A, B, rcond=-1)[0]
-    logger.debug("Zernike polynomial fitting completed")
+    logger.debug("Orthonormal polynomial fitting completed")
 
     # Calculate model using computed coefficients
-    model = np.sum(coeff.reshape(-1, 1, 1) * zkm, axis=0)
+    model = np.sum(coeff.reshape(-1, 1, 1) * polys, axis=0)
 
     # Calculate PTTF (first 4 terms)
-    pttf_zkm, _ = calculate_zernike(pupil_mask, x, y, 4)
-    pttf = np.sum(coeff[:4].reshape(-1, 1, 1) * pttf_zkm, axis=0)
+    pttf_poly, _ = calculate_polynomials(pupil_mask, x, y, 4)
+    pttf_polys = pttf_poly()
+    pttf = np.sum(coeff[:4].reshape(-1, 1, 1) * pttf_polys, axis=0)
 
     # Calculate residual
     residual = masked_error - model
 
-    return WFEResult(coefficients=coeff, pttf=pttf, model=model, residual=residual)
+    # Calculate Zernike coefficients
+    zernikes = np.copy(coeff)
+    zernikes[:3] = 0.0  # Set Piston, Tip, Tilt to zero
+    zernikes = poly.toZernike(zernikes)
+
+    return WFEResult(
+        coefficients=coeff, zernikes=zernikes, pttf=pttf, model=model, residual=residual
+    )
 
 
 def analyze_wfe_data(
-    wfe_file: Path, n_zernike: int = 15
+    wfe_file: Path, n_polynomials: int = 15
 ) -> Tuple[WFEResult, EllipticalParams]:
     """Analyze WFE data file.
 
     Args:
         wfe_file: Path to WFE data file
-        n_zernike: Number of Zernike polynomials to use
+        n_polynomials: Number of polynomials to use
 
     Returns:
         tuple: (WFEResult object, EllipticalParams object)
@@ -165,17 +177,23 @@ def analyze_wfe_data(
     logger.debug("Creating elliptical aperture mask")
     mask = label(~errormap_ma.mask)
     aperture, params = mask_to_elliptical_aperture(mask)
-    logger.debug(f"Elliptical aperture found: center=({params.x0:.1f}, {params.y0:.1f}), "
-               f"axes=({params.a:.1f}, {params.b:.1f}), theta={params.theta:.3f}")
+    logger.debug(
+        f"Elliptical aperture found: center=({params.x0:.1f}, {params.y0:.1f}), "
+        f"axes=({params.a:.1f}, {params.b:.1f}), theta={params.theta:.3f}"
+    )
 
     # Create normalized coordinates
     shape = errormap.shape
     x = (np.arange(shape[1]) - params.x0) / params.a
     y = (np.arange(shape[0]) - params.y0) / params.a
 
-    # Fit Zernike polynomials
-    result = fit_zernike(
-        errormap=errormap, pupil_mask=~mask.astype(bool), x=x, y=y, n_zernike=n_zernike
+    # Fit orthonormal polynomials
+    result = fit_polynomials(
+        errormap=errormap,
+        pupil_mask=~mask.astype(bool),
+        x=x,
+        y=y,
+        n_polynomials=n_polynomials,
     )
 
     logger.info(f"Analysis complete - RMS error: {result.rms_error():.2f} nm")

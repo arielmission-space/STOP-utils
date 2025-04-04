@@ -80,7 +80,7 @@ def test_generate_plots(
         "wfe_pttf.png",
         "wfe_model.png",
         "wfe_residual.png",
-        "zernike_orthonormal_coefficients.png",
+        "polynomial_coefficients.png",
     ]
 
     for filename in expected_files:
@@ -107,7 +107,7 @@ def test_plot_formats(
 
         # Check files exist and have correct format
         assert (output_dir / f"wfe_raw.{fmt}").exists()
-        assert (output_dir / f"zernike_orthonormal_coefficients.{fmt}").exists()
+        assert (output_dir / f"polynomial_coefficients.{fmt}").exists()
 
 
 def test_plot_error_handling(sample_wfe_data: np.ndarray) -> None:

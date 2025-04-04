@@ -24,7 +24,7 @@ def test_analyze_wfe_basic(sample_wfe_file: Path, temp_output_dir: Path) -> None
 
     # Check output files
     assert (temp_output_dir / "wfe_raw.png").exists()
-    assert (temp_output_dir / "zernike_orthonormal_coefficients.json").exists()
+    assert (temp_output_dir / "polynomial_coefficients.json").exists()
 
 
 def test_analyze_wfe_no_plots(sample_wfe_file: Path, temp_output_dir: Path) -> None:
@@ -36,7 +36,7 @@ def test_analyze_wfe_no_plots(sample_wfe_file: Path, temp_output_dir: Path) -> N
     )
 
     assert result.exit_code == 0
-    assert (temp_output_dir / "zernike_orthonormal_coefficients.json").exists()
+    assert (temp_output_dir / "polynomial_coefficients.json").exists()
     assert not (temp_output_dir / "wfe_raw.png").exists()
 
 
@@ -54,25 +54,25 @@ def test_analyze_wfe_custom_format(
     assert (temp_output_dir / "wfe_raw.pdf").exists()
 
 
-def test_analyze_wfe_custom_zernike(
+def test_analyze_wfe_custom_polynomials(
     sample_wfe_file: Path, temp_output_dir: Path
 ) -> None:
-    """Test analysis with custom number of Zernike polynomials."""
+    """Test analysis with custom number of polynomials."""
     result = runner.invoke(
         app,
-        ["analyze", str(sample_wfe_file), str(temp_output_dir), "--nzernike", "20"],
+        ["analyze", str(sample_wfe_file), str(temp_output_dir), "--npolynomials", "20"],
         standalone_mode=False,
     )
 
     assert result.exit_code == 0
 
     # Check coefficient count, units, and ellipse parameters
-    coeff_file = temp_output_dir / "zernike_orthonormal_coefficients.json"
+    coeff_file = temp_output_dir / "polynomial_coefficients.json"
     with open(coeff_file) as f:
         data = json.load(f)
         # Check coefficients
         assert len(data["coefficients"]) == 20
-        
+
         # Check units
         assert "units" in data
         units = data["units"]
@@ -80,7 +80,7 @@ def test_analyze_wfe_custom_zernike(
         assert units["center"] == "pixel"
         assert units["semi_axes"] == "pixel"
         assert units["angle"] == "rad"
-        
+
         # Check ellipse parameters
         assert "ellipse_parameters" in data
         ellipse = data["ellipse_parameters"]
@@ -102,7 +102,7 @@ def test_analyze_wfe_no_coeffs(sample_wfe_file: Path, temp_output_dir: Path) -> 
     )
 
     assert result.exit_code == 0
-    assert not (temp_output_dir / "zernike_orthonormal_coefficients.json").exists()
+    assert not (temp_output_dir / "polynomial_coefficients.json").exists()
 
 
 def test_analyze_wfe_invalid_input() -> None:
@@ -132,12 +132,13 @@ def test_analyze_wfe_invalid_format(
     assert "Plot format must be one of" in result.stderr
 
 
-def test_analyze_wfe_invalid_nzernike(
+def test_analyze_wfe_invalid_npolynomials(
     sample_wfe_file: Path, temp_output_dir: Path
 ) -> None:
-    """Test error handling for invalid number of Zernike polynomials."""
+    """Test error handling for invalid number of polynomials."""
     result = runner.invoke(
-        app, ["analyze", str(sample_wfe_file), str(temp_output_dir), "--nzernike", "0"]
+        app,
+        ["analyze", str(sample_wfe_file), str(temp_output_dir), "--npolynomials", "0"],
     )
 
     assert result.exit_code == 2  # Typer exit code for invalid parameter

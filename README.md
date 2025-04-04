@@ -4,7 +4,7 @@ Utilities for analyzing wavefront error data.
 
 ## Overview
 
-This package provides utilities for Wavefront Error (WFE) analysis, implementing Zernike orthonormal polynomial decomposition and visualization tools. The core functionality is based on the `PAOS` package (see [readthedocs](https://paos.readthedocs.io/en/latest/)).
+This package provides utilities for Wavefront Error (WFE) analysis, implementing orthonormal polynomial decomposition and visualization tools. The core functionality is based on the `PAOS` package (see [readthedocs](https://paos.readthedocs.io/en/latest/)).
 
 ## Installation
 

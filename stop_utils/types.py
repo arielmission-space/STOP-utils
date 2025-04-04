@@ -23,6 +23,7 @@ class WFEResult:
     """Results from WFE analysis."""
 
     coefficients: npt.NDArray[np.float64]
+    zernikes: npt.NDArray[np.float64]
     pttf: npt.NDArray[np.float64]
     model: npt.NDArray[np.float64]
     residual: npt.NDArray[np.float64]
@@ -40,7 +41,7 @@ class WFEResult:
 class AnalysisConfig:
     """Configuration for WFE analysis."""
 
-    n_zernike: int
+    n_polynomials: int
     save_coeffs: bool
     generate_plots: bool
     plot_format: str

@@ -118,8 +118,10 @@ def generate_plots(
     aperture = EllipticalAperture(
         (params.x0, params.y0), params.a, params.b, theta=params.theta
     )
-    logger.debug(f"Created aperture: center=({params.x0:.1f}, {params.y0:.1f}), "
-               f"axes=({params.a:.1f}, {params.b:.1f}), theta={params.theta:.3f}")
+    logger.debug(
+        f"Created aperture: center=({params.x0:.1f}, {params.y0:.1f}), "
+        f"axes=({params.a:.1f}, {params.b:.1f}), theta={params.theta:.3f}"
+    )
 
     # Raw WFE map
     plot_wfe_data(
@@ -143,7 +145,7 @@ def generate_plots(
     plot_wfe_data(
         result.model,
         aperture=aperture,
-        title="Orthonormal Zernike Model Fit",
+        title="Orthonormal Polynomial Model Fit",
         output_path=output_dir / f"wfe_model.{format}",
         zoom=zoom,
     )
@@ -160,14 +162,14 @@ def generate_plots(
     # Coefficient plot
     plt.figure(figsize=(12, 6))
     plt.bar(range(len(result.coefficients)), result.coefficients)
-    plt.xlabel("Orthonormal Zernike Mode")
+    plt.xlabel("Orthonormal Polynomial Mode")
     plt.ylabel("Coefficient (nm)")
-    plt.title("Orthonormal Zernike Coefficients")
+    plt.title("Orthonormal Polynomial Coefficients")
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    coeff_plot = output_dir / f"zernike_orthonormal_coefficients.{format}"
+    coeff_plot = output_dir / f"polynomial_coefficients.{format}"
     logger.debug(f"Saving coefficient plot to {coeff_plot}")
     plt.savefig(coeff_plot)
     plt.close()
-    
+
     logger.info("All plots generated successfully")

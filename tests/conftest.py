@@ -60,7 +60,7 @@ def sample_wfe_file(tmp_path: Path, sample_wfe_data: np.ndarray) -> Path:
 def analysis_config(temp_output_dir: Path) -> AnalysisConfig:
     """Create sample analysis configuration."""
     return AnalysisConfig(
-        n_zernike=15,
+        n_polynomials=15,
         save_coeffs=True,
         generate_plots=True,
         plot_format="png",

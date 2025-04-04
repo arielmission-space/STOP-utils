@@ -17,48 +17,64 @@ from .wfe_analysis import analyze_wfe_data
 # Set logger context for CLI
 logger = logger.bind(context="cli")
 
+
 def version_callback(value: bool) -> None:
     """Show version and exit."""
     if value:
         logger.info(f"stop-utils version {__version__}")
         raise typer.Exit()
 
+
 # Create console for output
 console = Console()
 
-def create_coefficients_table(coefficients: List[float]) -> Table:
-    """Create a rich table displaying Zernike orthonormal coefficients."""
-    table = Table(title="Zernike Orthonormal Coefficients")
+
+def create_coefficients_table(
+    coefficients: List[float], zernikes: List[float]
+) -> Table:
+    """Create a rich table displaying polynomial coefficients."""
+    table = Table(title="Polynomial Coefficients")
     table.add_column("Mode", justify="center", style="cyan")
-    table.add_column("Coefficient (nm)", justify="right", style="green")
-    
-    for i, coeff in enumerate(coefficients):
-        table.add_row(str(i), f"{coeff:.3f}")
-    
+    table.add_column("Orthonormal Coefficient (nm)", justify="right", style="green")
+    table.add_column("Zernike Coefficient (nm)", justify="right", style="green")
+
+    for i, (coeff, zern) in enumerate(zip(coefficients, zernikes)):
+        table.add_row(str(i), f"{coeff:.3f}", f"{zern:.3f}")
+
     return table
 
-def save_coefficients(output_dir: Path, coefficients: List[float], params: EllipticalParams) -> None:
-    """Save Zernike orthonormal coefficients and ellipse parameters to JSON file."""
-    coeff_file = output_dir / "zernike_orthonormal_coefficients.json"
+
+def save_coefficients(
+    output_dir: Path,
+    orthonormal_coefficients: List[float],
+    zernike_coefficients: List[float],
+    params: EllipticalParams,
+) -> None:
+    """Save polynomial coefficients and ellipse parameters to JSON file."""
+    coeff_file = output_dir / "polynomial_coefficients.json"
     with open(coeff_file, "w") as f:
         json.dump(
             {
-                "coefficients": [float(c) for c in coefficients],
+                "orthonormal_coefficients": [
+                    float(c) for c in orthonormal_coefficients
+                ],
+                "zernike_coefficients": [float(c) for c in zernike_coefficients],
                 "units": {
                     "coefficients": "nm",
                     "center": "pixel",
                     "semi_axes": "pixel",
-                    "angle": "rad"
+                    "angle": "rad",
                 },
                 "ellipse_parameters": {
                     "center": {"x": float(params.x0), "y": float(params.y0)},
                     "semi_axes": {"a": float(params.a), "b": float(params.b)},
-                    "angle": float(params.theta)
-                }
+                    "angle": float(params.theta),
+                },
             },
             f,
             indent=2,
         )
+
 
 def validate_plot_format(value: str) -> str:
     """Validate plot format option."""
@@ -66,10 +82,11 @@ def validate_plot_format(value: str) -> str:
         raise typer.BadParameter("Plot format must be one of: png, pdf, svg")
     return value
 
+
 def run_analysis(
     input_file: Path,
     output_dir: Path,
-    n_zernike: int,
+    n_polynomials: int,
     plot_format: str,
     save_coeffs: bool,
     no_plots: bool,
@@ -85,7 +102,7 @@ def run_analysis(
 
         # Create configuration
         config = AnalysisConfig(
-            n_zernike=n_zernike,
+            n_polynomials=n_polynomials,
             save_coeffs=save_coeffs,
             generate_plots=not no_plots,
             plot_format=plot_format,
@@ -102,7 +119,7 @@ def run_analysis(
             try:
                 task_id = progress.add_task("Analyzing", total=None)
                 result, params = analyze_wfe_data(
-                    wfe_file=input_file, n_zernike=config.n_zernike
+                    wfe_file=input_file, n_polynomials=config.n_polynomials
                 )
                 progress.remove_task(task_id)
             except FileNotFoundError:
@@ -117,7 +134,10 @@ def run_analysis(
                 try:
                     task_id = progress.add_task("Saving", total=None)
                     coeff_list = [float(c) for c in result.coefficients]
-                    save_coefficients(config.output_dir, coeff_list, params)
+                    zernikes_list = [float(c) for c in result.zernikes]
+                    save_coefficients(
+                        config.output_dir, coeff_list, zernikes_list, params
+                    )
                     progress.remove_task(task_id)
                 except Exception as e:
                     logger.error(f"Failed to save coefficients: {e}")
@@ -144,8 +164,9 @@ def run_analysis(
 
         # Display coefficients table
         coeff_list = [float(c) for c in result.coefficients]
-        console.print(create_coefficients_table(coeff_list))
-        
+        zernikes_list = [float(c) for c in result.zernikes]
+        console.print(create_coefficients_table(coeff_list, zernikes_list))
+
         # Log metrics, ellipse parameters, and output locations
         logger.info(
             "Results:\n"
@@ -156,13 +177,15 @@ def run_analysis(
             f"  Semi-axes: ({params.a:.1f}, {params.b:.1f})\n"
             f"  Angle: {params.theta:.3f} rad"
         )
-        
+
         if config.generate_plots or config.save_coeffs:
             outputs = []
             if config.generate_plots:
                 outputs.append(f"  Plots: {output_dir}")
             if config.save_coeffs:
-                outputs.append(f"  Coefficients: {output_dir}/zernike_orthonormal_coefficients.json")
+                outputs.append(
+                    f"  Coefficients: {output_dir}/polynomial_coefficients.json"
+                )
             logger.info("Output files:\n" + "\n".join(outputs))
 
     except typer.Exit:
@@ -170,6 +193,7 @@ def run_analysis(
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         raise typer.Exit(1)
+
 
 # Create the Typer app
 app = typer.Typer(
@@ -180,6 +204,7 @@ app = typer.Typer(
     no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
 )
+
 
 @app.callback()
 def callback(
@@ -196,9 +221,10 @@ def callback(
     Wavefront Error Analysis Tools - Analyze and visualize wavefront error data.
 
     This tool provides functionality for analyzing wavefront error data using
-    Zernike orthornormal polynomial decomposition and generating visualization outputs.
+    (orthonormal) polynomial decomposition on elliptical apertures and generating visualization outputs.
     """
     pass
+
 
 @app.command()
 def analyze(
@@ -208,8 +234,8 @@ def analyze(
     output_dir: Path = typer.Argument(
         ..., file_okay=False, dir_okay=True, help="Output directory for results"
     ),
-    n_zernike: int = typer.Option(
-        15, "--nzernike", "-n", min=1, help="Number of Zernike orthonormal polynomials"
+    n_polynomials: int = typer.Option(
+        15, "--npolynomials", "-n", min=1, help="Number of polynomials"
     ),
     plot_format: str = typer.Option(
         "png",
@@ -221,7 +247,7 @@ def analyze(
     save_coeffs: bool = typer.Option(
         True,
         "--save-coeffs/--no-save-coeffs",
-        help="Save Zernike orthonormal coefficients to JSON",
+        help="Save polynomial coefficients to JSON",
     ),
     no_plots: bool = typer.Option(False, help="Skip plot generation"),
 ) -> None:
@@ -229,15 +255,17 @@ def analyze(
     run_analysis(
         input_file=input_file,
         output_dir=output_dir,
-        n_zernike=n_zernike,
+        n_polynomials=n_polynomials,
         plot_format=plot_format,
         save_coeffs=save_coeffs,
         no_plots=no_plots,
     )
 
+
 def main() -> None:
     """Main entry point for the CLI."""
     app()
+
 
 if __name__ == "__main__":
     main()

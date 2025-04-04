@@ -11,8 +11,8 @@ from photutils.aperture import EllipticalAperture
 
 from stop_utils.wfe_analysis import (
     analyze_wfe_data,
-    calculate_zernike,
-    fit_zernike,
+    calculate_polynomials,
+    fit_polynomials,
     load_wfe_data,
     mask_to_elliptical_aperture,
 )
@@ -43,35 +43,36 @@ def test_mask_to_elliptical_aperture(sample_wfe_data: np.ndarray) -> None:
     assert -np.pi <= params.theta <= np.pi
 
 
-def test_calculate_zernike(sample_wfe_data: np.ndarray) -> None:
-    """Test Zernike polynomial calculation."""
+def test_calculate_polynomials(sample_wfe_data: np.ndarray) -> None:
+    """Test orthonormal polynomial calculation."""
     # Setup
     mask = sample_wfe_data != 0
     size = sample_wfe_data.shape[0]
     x = np.linspace(-1, 1, size)
     y = np.linspace(-1, 1, size)
 
-    # Calculate Zernike polynomials
-    zkm, A = calculate_zernike(~mask, x, y, n_zernike=15)
+    # Calculate orthonormal polynomials
+    poly, A = calculate_polynomials(~mask, x, y, n_polynomials=15)
+    polys = poly()
 
     # Check outputs
-    assert zkm.shape[0] == 15  # Number of polynomials
-    assert zkm.shape[1:] == sample_wfe_data.shape
+    assert polys.shape[0] == 15  # Number of polynomials
+    assert polys.shape[1:] == sample_wfe_data.shape
     assert A.shape == (15, 15)  # Covariance matrix
     assert np.allclose(A, A.T)  # Should be symmetric
 
 
-def test_fit_zernike(sample_wfe_data: np.ndarray) -> None:
-    """Test Zernike polynomial fitting."""
+def test_fit_polynomials(sample_wfe_data: np.ndarray) -> None:
+    """Test orthonormal polynomial fitting."""
     # Setup
     mask = sample_wfe_data != 0
     size = sample_wfe_data.shape[0]
     x = np.linspace(-1, 1, size)
     y = np.linspace(-1, 1, size)
 
-    # Fit Zernike polynomials
-    result = fit_zernike(
-        errormap=sample_wfe_data, pupil_mask=~mask, x=x, y=y, n_zernike=15
+    # Fit orthonormal polynomials
+    result = fit_polynomials(
+        errormap=sample_wfe_data, pupil_mask=~mask, x=x, y=y, n_polynomials=15
     )
 
     # Check results
@@ -81,15 +82,16 @@ def test_fit_zernike(sample_wfe_data: np.ndarray) -> None:
     assert result.residual.shape == sample_wfe_data.shape
 
     # Check PTTF is first 4 terms
-    pttf_zkm, _ = calculate_zernike(~mask, x, y, 4)
-    pttf_direct = np.sum(result.coefficients[:4].reshape(-1, 1, 1) * pttf_zkm, axis=0)
+    pttf_poly, _ = calculate_polynomials(~mask, x, y, 4)
+    pttf_polys = pttf_poly()
+    pttf_direct = np.sum(result.coefficients[:4].reshape(-1, 1, 1) * pttf_polys, axis=0)
     assert np.allclose(pttf_direct, result.pttf, rtol=1e-10)
 
 
 def test_analyze_wfe_data(sample_wfe_file: Path) -> None:
     """Test complete WFE analysis pipeline."""
     # Run analysis
-    result, params = analyze_wfe_data(sample_wfe_file, n_zernike=15)
+    result, params = analyze_wfe_data(sample_wfe_file, n_polynomials=15)
 
     # Check results
     assert len(result.coefficients) == 15
@@ -115,27 +117,27 @@ def test_error_handling() -> None:
 
 
 def test_coefficient_stability(sample_wfe_file: Path) -> None:
-    """Test stability of Zernike coefficient fitting."""
+    """Test stability of orthonormal polynomial coefficient fitting."""
     # Run analysis twice
-    result1, _ = analyze_wfe_data(sample_wfe_file, n_zernike=15)
-    result2, _ = analyze_wfe_data(sample_wfe_file, n_zernike=15)
+    result1, _ = analyze_wfe_data(sample_wfe_file, n_polynomials=15)
+    result2, _ = analyze_wfe_data(sample_wfe_file, n_polynomials=15)
 
     # Results should be identical for same input
     assert np.allclose(result1.coefficients, result2.coefficients)
 
 
-@pytest.mark.parametrize("n_zernike", [10, 15, 21])
+@pytest.mark.parametrize("n_polynomials", [10, 15, 21])
 @pytest.mark.parametrize("aspect", [(1, 1), (2, 1), (1, 2)])
 @pytest.mark.parametrize("center_pos", [(0.5, 0.5), (0.4, 0.6), (0.3, 0.3)])
-def test_zernike_fitting_roundtrip(
-    n_zernike: int,
+def test_fitting_roundtrip(
+    n_polynomials: int,
     aspect: tuple[float, float],
     center_pos: tuple[float, float],
 ) -> None:
-    """Test if fitting a known Zernike combination recovers the coefficients.
+    """Test if fitting a known orthonormal polynomial combination recovers the coefficients.
 
     Args:
-        n_zernike: Number of Zernike polynomials to fit
+        n_polynomials: Number of polynomials to fit
         aspect: Tuple of (a_factor, b_factor) for ellipse aspect ratio
         center_pos: Tuple of (x_frac, y_frac) for relative center position
     """
@@ -160,7 +162,7 @@ def test_zernike_fitting_roundtrip(
     photutils_mask = aperture.to_mask(method="exact")
     pupil_mask = ~photutils_mask.to_image((size, size)).astype(bool)
 
-    # Normalized coordinates for Zernike calculation
+    # Normalized coordinates for polynomial calculation
     x = (x_coords - x0) / a
     y = (y_coords - y0) / a
     xx, yy = np.meshgrid(x, y)
@@ -170,11 +172,11 @@ def test_zernike_fitting_roundtrip(
     phi = np.arctan2(yy, xx)
 
     # 3. Generate random coefficients
-    input_coefficients = np.random.normal(0, 1, n_zernike) * 500
+    input_coefficients = np.random.normal(0, 1, n_polynomials) * 500
 
     # 4. Generate the "true" WFE map using PolyOrthoNorm
     poly = PolyOrthoNorm(
-        n_zernike,
+        n_polynomials,
         rho,
         phi,
         mask=pupil_mask,
@@ -188,17 +190,17 @@ def test_zernike_fitting_roundtrip(
     )
 
     # 5. Fit the generated WFE map
-    result = fit_zernike(
+    result = fit_polynomials(
         errormap=true_wfe_map_masked.filled(np.nan),
         pupil_mask=pupil_mask,
         x=x,
         y=y,
-        n_zernike=n_zernike,
+        n_polynomials=n_polynomials,
     )
 
     # 6. Compare fitted coefficients to the original input coefficients
     print("\nTest configuration:")
-    print(f"n_zernike: {n_zernike}")
+    print(f"n_polynomials: {n_polynomials}")
     print(f"aspect ratio: {aspect}")
     print(f"center position: {center_pos}")
     print("\nResults:")
