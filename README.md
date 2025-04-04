@@ -8,7 +8,10 @@ This package provides utilities for Wavefront Error (WFE) analysis, implementing
 
 ## Installation
 
-### From PyPI
+# [From PyPI](#tab-pypi) | [From GitHub](#tab-github) | [Development](#tab-dev)
+
+=== tab-pypi
+### Install from PyPI
 
 Once the package is published on PyPI, you can install it using pip:
 
@@ -16,7 +19,8 @@ Once the package is published on PyPI, you can install it using pip:
 pip install stop-utils
 ```
 
-### From GitHub
+=== tab-github
+### Install from GitHub
 
 You can install the latest development version directly from GitHub:
 
@@ -24,15 +28,30 @@ You can install the latest development version directly from GitHub:
 pip install git+https://github.com/arielmission-space/STOP-utils.git
 ```
 
+=== tab-dev
 ### Development Installation
 
-For development, you can install using either make:
+First, clone the repository:
+
+```bash
+git clone https://github.com/arielmission-space/STOP-utils.git
+cd STOP-utils
+```
+
+Then, create a virtual environment and activate it:
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+```
+
+Finally, install dependencies with either make:
 
 ```bash
 make install
 ```
 
-Or directly with poetry:
+Or poetry:
 
 ```bash
 poetry install
