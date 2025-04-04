@@ -111,7 +111,7 @@ def fit_polynomials(
     Returns:
         WFEResult object containing:
         - coefficients: Fitted orthonormal polynomial coefficients
-        - zernikes: Zernike polynomial coefficients (after removing first 3 terms from the orthonormal fit)
+        - zernikes: Zernike coefficients (after removing first 3 terms from the orthonormal fit)
         - PTTF component map
         - Complete model map
         - Residual error map

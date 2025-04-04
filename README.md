@@ -108,7 +108,7 @@ class AnalysisConfig:
 1. **wfe_analysis.py**: Core functionality for WFE analysis
    - Loading and preprocessing WFE data
    - Elliptical mask creation and fitting
-   - Zernike polynomial decomposition
+   - Orthonormal polynomial decomposition
    - Coefficient calculation and fitting
 
 2. **visualization.py**: Plotting utilities
@@ -132,9 +132,9 @@ stop-utils analyze input_file.dat output_dir/
 
 Options:
 
-- `--nzernike`, `-n`: Number of Zernike polynomials (default: 15)
+- `--nzernike`, `-n`: Number of polynomials (default: 15)
 - `--plot-format`, `-f`: Plot output format (png, pdf, svg) (default: png)
-- `--save-coeffs/--no-save-coeffs`: Save Zernike coefficients to JSON
+- `--save-coeffs/--no-save-coeffs`: Save coefficients to JSON
 - `--no-plots`: Skip plot generation
 - `--help`, `-h`: Show help message
 - `--version`, `-v`: Show version information
@@ -151,7 +151,7 @@ The tool generates several outputs in the specified directory:
 
 - `wfe_raw.{format}`: Raw wavefront error data
 - `wfe_pttf.{format}`: Piston, tip, tilt, and focus components
-- `wfe_model.{format}`: Zernike model fit
+- `wfe_model.{format}`: Orthonormal polynomial model fit
 - `wfe_residual.{format}`: Residual error after model fit
 - `polynomial_coefficients.{format}`: Bar plot of polynomial coefficients
 - `polynomial_coefficients.json`: JSON file containing coefficient values
@@ -205,7 +205,7 @@ Example workflow:
    graph TD
       A[Input WFE Data] --> B[Preprocessing]
       B --> C[Elliptical Fitting]
-      C --> D[Zernike Analysis]
+      C --> D[Polynomial Analysis]
       D --> E[Results Generation]
       E --> F[Plot Output]
       E --> G[Coefficient Output]
@@ -213,7 +213,7 @@ Example workflow:
 
 2. Core Functions:
    - `mask_to_elliptical_aperture()`: Converts mask to elliptical aperture
-   - `calculate_zernike()`: Computes Zernike polynomials
+   - `calculate_zernike()`: Computes polynomials decomposition
    - `fit_zernike()`: Performs polynomial fitting
    - `generate_plots()`: Creates visualization outputs
 
