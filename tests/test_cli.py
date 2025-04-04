@@ -60,7 +60,7 @@ def test_analyze_wfe_custom_polynomials(
     """Test analysis with custom number of polynomials."""
     result = runner.invoke(
         app,
-        ["analyze", str(sample_wfe_file), str(temp_output_dir), "--npolynomials", "20"],
+        ["analyze", str(sample_wfe_file), str(temp_output_dir), "--npolynomials", "11"],
         standalone_mode=False,
     )
 
@@ -71,7 +71,8 @@ def test_analyze_wfe_custom_polynomials(
     with open(coeff_file) as f:
         data = json.load(f)
         # Check coefficients
-        assert len(data["coefficients"]) == 20
+        assert len(data["orthonormal_coefficients"]) == 11
+        assert len(data["zernike_coefficients"]) == 11
 
         # Check units
         assert "units" in data
