@@ -153,8 +153,8 @@ The tool generates several outputs in the specified directory:
 - `wfe_pttf.{format}`: Piston, tip, tilt, and focus components
 - `wfe_model.{format}`: Zernike model fit
 - `wfe_residual.{format}`: Residual error after model fit
-- `zernike_coefficients.{format}`: Bar plot of Zernike coefficients
-- `zernike_coefficients.json`: JSON file containing coefficient values
+- `polynomial_coefficients.{format}`: Bar plot of polynomial coefficients
+- `polynomial_coefficients.json`: JSON file containing coefficient values
 
 ## Requirements
 
