@@ -33,7 +33,9 @@ def create_coefficients_table(
     coefficients: List[float], zernikes: List[float]
 ) -> Table:
     """Create a rich table displaying polynomial coefficients."""
-    table = Table(title="Polynomial Coefficients (standard ordering, normalize = False)")
+    table = Table(
+        title="Polynomial Coefficients (standard ordering, normalize = False)"
+    )
     table.add_column("Mode", justify="center", style="cyan")
     table.add_column("Orthonormal Coefficient (nm)", justify="right", style="green")
     table.add_column("Zernike Coefficient (nm)", justify="right", style="green")
