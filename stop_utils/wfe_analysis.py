@@ -85,7 +85,6 @@ def calculate_polynomials(
 
     logger.debug(f"Calculating {n_polynomials} orthonormal polynomials")
     poly = PolyOrthoNorm(n_polynomials, rho, phi, normalize=False, ordering="standard")
-    polys = poly()
     A = poly.cov()
     logger.debug("Orthonormal polynomials calculated")
 
