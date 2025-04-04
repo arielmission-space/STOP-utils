@@ -20,6 +20,7 @@ def sample_result(sample_wfe_data: np.ndarray) -> WFEResult:
     """Create sample WFEResult for testing."""
     return WFEResult(
         coefficients=np.random.random(15),
+        zernikes=np.random.random(15),
         pttf=sample_wfe_data.copy(),
         model=sample_wfe_data.copy(),
         residual=np.random.random(sample_wfe_data.shape),

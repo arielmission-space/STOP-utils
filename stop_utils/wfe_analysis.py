@@ -65,7 +65,7 @@ def calculate_polynomials(
     x: npt.NDArray[np.float64],
     y: npt.NDArray[np.float64],
     n_polynomials: int = 15,
-) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+) -> Tuple[PolyOrthoNorm, npt.NDArray[np.float64]]:
     """Calculate orthonormal polynomials for given coordinates.
 
     Args:
