@@ -66,11 +66,31 @@ def test_analyze_wfe_custom_zernike(
 
     assert result.exit_code == 0
 
-    # Check coefficient count
+    # Check coefficient count, units, and ellipse parameters
     coeff_file = temp_output_dir / "zernike_orthonormal_coefficients.json"
     with open(coeff_file) as f:
         data = json.load(f)
+        # Check coefficients
         assert len(data["coefficients"]) == 20
+        
+        # Check units
+        assert "units" in data
+        units = data["units"]
+        assert units["coefficients"] == "nm"
+        assert units["center"] == "pixel"
+        assert units["semi_axes"] == "pixel"
+        assert units["angle"] == "rad"
+        
+        # Check ellipse parameters
+        assert "ellipse_parameters" in data
+        ellipse = data["ellipse_parameters"]
+        assert "center" in ellipse
+        assert isinstance(ellipse["center"]["x"], float)
+        assert isinstance(ellipse["center"]["y"], float)
+        assert "semi_axes" in ellipse
+        assert isinstance(ellipse["semi_axes"]["a"], float)
+        assert isinstance(ellipse["semi_axes"]["b"], float)
+        assert isinstance(ellipse["angle"], float)
 
 
 def test_analyze_wfe_no_coeffs(sample_wfe_file: Path, temp_output_dir: Path) -> None:

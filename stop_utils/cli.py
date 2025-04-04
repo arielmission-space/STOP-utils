@@ -10,7 +10,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 from . import __version__, logger
-from .types import AnalysisConfig
+from .types import AnalysisConfig, EllipticalParams
 from .visualization import generate_plots
 from .wfe_analysis import analyze_wfe_data
 
@@ -37,12 +37,25 @@ def create_coefficients_table(coefficients: List[float]) -> Table:
     
     return table
 
-def save_coefficients(output_dir: Path, coefficients: List[float]) -> None:
-    """Save Zernike orthonormal coefficients to JSON file."""
+def save_coefficients(output_dir: Path, coefficients: List[float], params: EllipticalParams) -> None:
+    """Save Zernike orthonormal coefficients and ellipse parameters to JSON file."""
     coeff_file = output_dir / "zernike_orthonormal_coefficients.json"
     with open(coeff_file, "w") as f:
         json.dump(
-            {"coefficients": [float(c) for c in coefficients], "units": "nm"},
+            {
+                "coefficients": [float(c) for c in coefficients],
+                "units": {
+                    "coefficients": "nm",
+                    "center": "pixel",
+                    "semi_axes": "pixel",
+                    "angle": "rad"
+                },
+                "ellipse_parameters": {
+                    "center": {"x": float(params.x0), "y": float(params.y0)},
+                    "semi_axes": {"a": float(params.a), "b": float(params.b)},
+                    "angle": float(params.theta)
+                }
+            },
             f,
             indent=2,
         )
@@ -104,7 +117,7 @@ def run_analysis(
                 try:
                     task_id = progress.add_task("Saving", total=None)
                     coeff_list = [float(c) for c in result.coefficients]
-                    save_coefficients(config.output_dir, coeff_list)
+                    save_coefficients(config.output_dir, coeff_list, params)
                     progress.remove_task(task_id)
                 except Exception as e:
                     logger.error(f"Failed to save coefficients: {e}")
@@ -133,11 +146,15 @@ def run_analysis(
         coeff_list = [float(c) for c in result.coefficients]
         console.print(create_coefficients_table(coeff_list))
         
-        # Log metrics and output locations
+        # Log metrics, ellipse parameters, and output locations
         logger.info(
             "Results:\n"
             f"  RMS residual error: {result.rms_error():.2f} nm\n"
-            f"  PTP residual error: {result.peak_to_valley():.2f} nm"
+            f"  PTP residual error: {result.peak_to_valley():.2f} nm\n"
+            "\nEllipse parameters:\n"
+            f"  Center: ({params.x0:.1f}, {params.y0:.1f})\n"
+            f"  Semi-axes: ({params.a:.1f}, {params.b:.1f})\n"
+            f"  Angle: {params.theta:.3f} rad"
         )
         
         if config.generate_plots or config.save_coeffs:
