@@ -74,6 +74,12 @@ def test_analyze_wfe_custom_polynomials(
         assert len(data["orthonormal_coefficients"]) == 11
         assert len(data["zernike_coefficients"]) == 11
 
+        # Check polynomials definition
+        assert "polynomials_definition" in data
+        polynomials_definition = data["polynomials_definition"]
+        assert polynomials_definition["ordering"] == "standard"
+        assert polynomials_definition["normalize"] is False
+
         # Check units
         assert "units" in data
         units = data["units"]
