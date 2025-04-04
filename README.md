@@ -8,10 +8,8 @@ This package provides utilities for Wavefront Error (WFE) analysis, implementing
 
 ## Installation
 
-# [From PyPI](#tab-pypi) | [From GitHub](#tab-github) | [Development](#tab-dev)
-
-=== tab-pypi
-### Install from PyPI
+<details>
+<summary><strong>From PyPI</strong></summary>
 
 Once the package is published on PyPI, you can install it using pip:
 
@@ -19,8 +17,10 @@ Once the package is published on PyPI, you can install it using pip:
 pip install stop-utils
 ```
 
-=== tab-github
-### Install from GitHub
+</details>
+
+<details>
+<summary><strong>From GitHub</strong></summary>
 
 You can install the latest development version directly from GitHub:
 
@@ -28,8 +28,10 @@ You can install the latest development version directly from GitHub:
 pip install git+https://github.com/arielmission-space/STOP-utils.git
 ```
 
-=== tab-dev
-### Development Installation
+</details>
+
+<details>
+<summary><strong>Development Installation</strong></summary>
 
 First, clone the repository:
 
@@ -56,6 +58,8 @@ Or poetry:
 ```bash
 poetry install
 ```
+
+</details>
 
 ## Package Structure
 
