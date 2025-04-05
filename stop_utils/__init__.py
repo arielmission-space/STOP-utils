@@ -1,11 +1,34 @@
 """Wavefront Error Analysis Utilities."""
-
+import importlib.metadata as metadata
+import os
 import sys
+from datetime import date
 from pathlib import Path
 
 from loguru import logger
 
-__version__ = "0.1.0"
+from .types import AnalysisConfig, WFEResult
+from .visualization import generate_plots
+from .wfe_analysis import analyze_wfe_data
+
+__all__ = [
+    "WFEResult",
+    "AnalysisConfig",
+    "analyze_wfe_data",
+    "generate_plots",
+    "logger",
+]
+
+__version__ = metadata.version("stop-utils")
+
+# load package info
+__pkg_name__ = __title__ = metadata.metadata("stop-utils")["Name"].upper()
+__url__ = metadata.metadata("stop-utils")["Project-URL"]
+__author__ = metadata.metadata("stop-utils")["Author"]
+__license__ = metadata.metadata("stop-utils")["License"]
+__copyright__ = f"2025-{date.today().year:d}, {__author__}"
+__summary__ = metadata.metadata("stop-utils")["Summary"]
+
 
 # Configure loguru logger
 log_format = (
@@ -37,15 +60,3 @@ logger.add(
     retention="1 month",
     compression="gz",
 )
-
-from .types import AnalysisConfig, WFEResult
-from .visualization import generate_plots
-from .wfe_analysis import analyze_wfe_data
-
-__all__ = [
-    "WFEResult",
-    "AnalysisConfig",
-    "analyze_wfe_data",
-    "generate_plots",
-    "logger",
-]
