@@ -19,6 +19,7 @@ from stop_utils.visualization import (
 def sample_result(sample_wfe_data: np.ndarray) -> WFEResult:
     """Create sample WFEResult for testing."""
     return WFEResult(
+        raw=sample_wfe_data.copy(),
         coefficients=np.random.random(15),
         zernikes=np.random.random(15),
         pttf=sample_wfe_data.copy(),

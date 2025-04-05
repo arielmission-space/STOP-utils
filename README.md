@@ -90,7 +90,9 @@ Contains type definitions and data classes used throughout the package:
 ```python
 @dataclass
 class WFEResult:
+    raw: npt.NDArray[np.float64]
     coefficients: npt.NDArray[np.float64]
+    zernikes: npt.NDArray[np.float64]
     residual: npt.NDArray[np.float64]
     pttf: npt.NDArray[np.float64]
     model: npt.NDArray[np.float64]

@@ -22,6 +22,7 @@ class EllipticalParams:
 class WFEResult:
     """Results from WFE analysis."""
 
+    raw: npt.NDArray[np.float64]
     coefficients: npt.NDArray[np.float64]
     zernikes: npt.NDArray[np.float64]
     pttf: npt.NDArray[np.float64]

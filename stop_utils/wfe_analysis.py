@@ -109,6 +109,7 @@ def fit_polynomials(
 
     Returns:
         WFEResult object containing:
+        - raw: Errormap to be fitted
         - coefficients: Fitted orthonormal polynomial coefficients
         - zernikes: Zernike coefficients (after removing first 3 terms from the orthonormal fit)
         - PTTF component map
@@ -144,7 +145,12 @@ def fit_polynomials(
     zernikes = poly.toZernike(zernikes)
 
     return WFEResult(
-        coefficients=coeff, zernikes=zernikes, pttf=pttf, model=model, residual=residual
+        raw=masked_error,
+        coefficients=coeff,
+        zernikes=zernikes,
+        pttf=pttf,
+        model=model,
+        residual=residual,
     )
 
 
