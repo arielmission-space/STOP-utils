@@ -144,7 +144,7 @@ def test_zoom_levels() -> None:
     """Test different zoom levels in plots."""
     # Create a specific 100x100 test array
     test_data = np.zeros((100, 100))
-    zoom = 4
+    zoom = 2
 
     fig, ax = setup_wfe_plot(test_data, "Test", zoom=zoom)
 

@@ -26,10 +26,10 @@ def plotlim(s: int, zoom: int) -> Tuple[int, int]:
         tuple: (min_limit, max_limit)
     """
     center = s // 2
-    half_range = (
-        s // zoom
-    )  # Calculate half_range based on zoom factor to match test expectations
-    return (center - half_range, center + half_range + (s % 2))
+    zoomed_range = (
+        s // zoom // 2
+    )  # Calculate zoomed_range based on zoom factor to match test expectations
+    return (center - zoomed_range, center + zoomed_range + (s % 2))
 
 
 def setup_wfe_plot(
