@@ -154,7 +154,7 @@ def generate_plots(
     plot_wfe_data(
         result.residual,
         aperture=aperture,
-        title=f"Residual Error (RMS: {result.rms_error():.2f} nm)",
+        title=f"Residual Error (RMS: {result.rms(result.residual):.2f} nm)",
         output_path=output_dir / f"wfe_residual.{format}",
         zoom=zoom,
     )

@@ -28,13 +28,20 @@ class WFEResult:
     model: npt.NDArray[np.float64]
     residual: npt.NDArray[np.float64]
 
-    def rms_error(self) -> float:
-        """Calculate RMS of residual error."""
-        return float(np.ma.std(self.residual))
+    @staticmethod
+    def rms(errormap: npt.NDArray[np.float64]) -> float:
+        """Calculate RMS of the WFE errormap."""
+        return float(np.ma.std(errormap))
 
-    def peak_to_valley(self) -> float:
-        """Calculate peak-to-valley of residual error."""
-        return float(np.ma.ptp(self.residual))
+    @staticmethod
+    def rss(coefficients: npt.NDArray[np.float64]) -> float:
+        """Calculate RSS of coefficients."""
+        return float(np.sqrt(np.sum(coefficients**2)))
+
+    @staticmethod
+    def ptp(errormap: npt.NDArray[np.float64]) -> float:
+        """Calculate Peak to Valley of the WFE errormap."""
+        return float(np.ma.ptp(errormap))
 
 
 @dataclass

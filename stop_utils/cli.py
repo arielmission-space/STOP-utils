@@ -176,8 +176,9 @@ def run_analysis(
         # Log metrics, ellipse parameters, and output locations
         logger.info(
             "Results:\n"
-            f"  RMS residual error: {result.rms_error():.2f} nm\n"
-            f"  PTP residual error: {result.peak_to_valley():.2f} nm\n"
+            f"  Fit WFE RMS: {result.rms(result.model)}\n"
+            f"  Residual RMS: {result.rms(result.residual):.2f} nm\n"
+            f"  Residual PTP: {result.ptp(result.residual):.2f} nm\n"
             "\nEllipse parameters:\n"
             f"  Center: ({params.x0:.1f}, {params.y0:.1f})\n"
             f"  Semi-axes: ({params.a:.1f}, {params.b:.1f})\n"

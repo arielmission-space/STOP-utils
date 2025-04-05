@@ -6,7 +6,7 @@ import numpy as np
 import numpy.ma as ma
 import numpy.typing as npt
 import pytest
-from paos.classes.zernike import Zernike, PolyOrthoNorm
+from paos.classes.zernike import PolyOrthoNorm, Zernike
 from photutils.aperture import EllipticalAperture
 
 from stop_utils.wfe_analysis import (
@@ -95,8 +95,9 @@ def test_analyze_wfe_data(sample_wfe_file: Path) -> None:
 
     # Check results
     assert len(result.coefficients) == 15
-    assert isinstance(result.rms_error(), float)
-    assert isinstance(result.peak_to_valley(), float)
+    assert isinstance(result.rss(result.coefficients), float)
+    assert isinstance(result.rms(result.residual), float)
+    assert isinstance(result.ptp(result.residual), float)
 
     # Check parameters
     assert params.a > 0

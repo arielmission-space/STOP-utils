@@ -195,5 +195,5 @@ def analyze_wfe_data(
         n_polynomials=n_polynomials,
     )
 
-    logger.info(f"Analysis complete - RMS error: {result.rms_error():.2f} nm")
+    logger.info(f"Analysis complete - RMS error: {result.rms(result.residual):.2f} nm")
     return result, params
