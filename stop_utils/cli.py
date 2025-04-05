@@ -176,7 +176,9 @@ def run_analysis(
         # Log metrics, ellipse parameters, and output locations
         logger.info(
             "Results:\n"
-            f"  Fit WFE RMS: {result.rms(result.model)}\n"
+            f"  Fit WFE RMS: {result.rms(result.model):.2f}\n"
+            f"  Fit WFE RMS (-PTT): {result.rss(result.coefficients[3:]):.2f}\n"
+            f"  Fit WFE RMS (-PTTF): {result.rss(result.coefficients[4:]):.2f}\n"
             f"  Residual RMS: {result.rms(result.residual):.2f} nm\n"
             f"  Residual PTP: {result.ptp(result.residual):.2f} nm\n"
             "\nEllipse parameters:\n"
