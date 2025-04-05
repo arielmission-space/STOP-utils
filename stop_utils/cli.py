@@ -242,7 +242,7 @@ def analyze(
         ..., file_okay=False, dir_okay=True, help="Output directory for results"
     ),
     n_polynomials: int = typer.Option(
-        15, "--npolynomials", "-n", min=1, help="Number of polynomials"
+        15, "--npolynomials", "-n", min=4, help="Number of polynomials"
     ),
     plot_format: str = typer.Option(
         "png",
