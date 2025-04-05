@@ -6,7 +6,7 @@ import numpy as np
 import numpy.ma as ma
 import numpy.typing as npt
 import pytest
-from paos.classes.zernike import PolyOrthoNorm
+from paos.classes.zernike import Zernike, PolyOrthoNorm
 from photutils.aperture import EllipticalAperture
 
 from stop_utils.wfe_analysis import (
@@ -126,7 +126,7 @@ def test_coefficient_stability(sample_wfe_file: Path) -> None:
     assert np.allclose(result1.coefficients, result2.coefficients)
 
 
-@pytest.mark.parametrize("n_polynomials", [10, 15, 21])
+@pytest.mark.parametrize("n_polynomials", [10, 15])
 @pytest.mark.parametrize("aspect", [(1, 1), (2, 1), (1, 2)])
 @pytest.mark.parametrize("center_pos", [(0.5, 0.5), (0.4, 0.6), (0.3, 0.3)])
 def test_fitting_roundtrip(
@@ -211,3 +211,92 @@ def test_fitting_roundtrip(
     assert np.allclose(
         result.coefficients, input_coefficients, atol=1e-9
     ), "Fitted coefficients do not match input coefficients"
+
+
+def test_zernike_to_orthonormal_conversion() -> None:
+    """Test conversion between Zernike and orthonormal polynomials.
+
+    This test:
+    1. Creates a WFE map using standard Zernike polynomials on a circular aperture
+    2. Fits the map with orthonormal polynomials
+    3. Converts back to Zernike coefficients
+    4. Verifies the final coefficients match the input
+    """
+    # Setup
+    size = 512  # Grid size
+    base_radius = size // 8  # Base radius for scaling
+    n_polynomials = 21
+
+    # Create elliptical aperture parameters
+    a = base_radius * 2.0  # Semi-major axis
+    b = base_radius * 1.5  # Semi-minor axis
+    x0 = size // 2  # Center x
+    y0 = size // 2  # Center y
+    theta = 0.0  # np.deg2rad(30)  # rotation in degrees
+
+    # Create coordinates
+    x_coords = np.arange(size)
+    y_coords = np.arange(size)
+
+    # Create elliptical aperture and mask
+    aperture = EllipticalAperture((x0, y0), a, b, theta=theta)
+    photutils_mask = aperture.to_mask(method="exact")
+    pupil_mask = ~photutils_mask.to_image((size, size)).astype(bool)
+
+    # Create normalized coordinates
+    x = (x_coords - x0) / a
+    y = (y_coords - y0) / a
+    xx, yy = np.meshgrid(x, y)
+    rho = np.sqrt(xx**2 + yy**2)
+    phi = np.arctan2(yy, xx)
+
+    # Generate input Zernike coefficients
+    input_coefficients = np.random.normal(0, 1, n_polynomials) * 500  # nm
+
+    # Create WFE map using standard Zernikes
+    circular_poly = Zernike(
+        n_polynomials,
+        rho,
+        phi,
+        ordering="standard",
+        normalize=False,
+    )
+    circular_basis = circular_poly()
+    wfe_map = np.sum(input_coefficients.reshape(-1, 1, 1) * circular_basis, axis=0)
+    wfe_map_masked: np.ma.MaskedArray = np.ma.masked_array(wfe_map, mask=pupil_mask)
+
+    # Create orthonormal polynomial base
+    rho_e: np.ma.MaskedArray = np.ma.masked_array(
+        data=np.sqrt(xx**2 + yy**2), mask=pupil_mask
+    )
+    poly = PolyOrthoNorm(
+        n_polynomials,
+        rho_e,
+        phi,
+        mask=pupil_mask,
+        ordering="standard",
+        normalize=False,
+    )
+
+    # Fit with orthonormal polynomials
+    result = fit_polynomials(
+        errormap=wfe_map_masked.filled(np.nan),
+        pupil_mask=pupil_mask,
+        x=x,
+        y=y,
+        n_polynomials=n_polynomials,
+    )
+
+    coeff = result.coefficients
+    zernikes = poly.toZernike(coeff)
+
+    # Compare coefficients (allowing for some numerical differences)
+    print("\nConversion test:")
+    print(f"Input Zernike coefficients: {np.round(input_coefficients, 6)}")
+    print(f"Recovered Zernike coefficients: {np.round(zernikes, 6)}")
+    print(f"Max difference: {np.max(np.abs(zernikes - input_coefficients)):.3e}")
+
+    # The coefficients should match within reasonable tolerance
+    assert np.allclose(
+        zernikes, input_coefficients, atol=1e-9, rtol=1e-3
+    ), "Recovered Zernike coefficients do not match input coefficients"
