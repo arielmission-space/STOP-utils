@@ -19,15 +19,16 @@ __all__ = [
     "logger",
 ]
 
-__version__ = metadata.version("stop-utils")
+project = "stop-utils"
 
 # load package info
-__pkg_name__ = __title__ = metadata.metadata("stop-utils")["Name"].upper()
-__url__ = metadata.metadata("stop-utils")["Project-URL"]
-__author__ = metadata.metadata("stop-utils")["Author"]
-__license__ = metadata.metadata("stop-utils")["License"]
+__pkg_name__ = __title__ = metadata.metadata(project)["Name"].upper()
+__version__ = metadata.version(project)
+__url__ = metadata.metadata(project)["Project-URL"]
+__author__ = metadata.metadata(project)["Author"]
+__license__ = metadata.metadata(project)["License"]
 __copyright__ = f"2025-{date.today().year:d}, {__author__}"
-__summary__ = metadata.metadata("stop-utils")["Summary"]
+__summary__ = metadata.metadata(project)["Summary"]
 
 
 # Configure loguru logger

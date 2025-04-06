@@ -21,6 +21,13 @@ pytest = "^7.4.0"
 mypy = "^1.6.0"
 types-setuptools = "^69.0.0"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = ">=4.0"
+sphinx-rtd-theme = ">=1.0"
+sphinx-autodoc-typehints = ">=1.12" # Added version constraint
+myst-parser = ">=0.15"
+sphinxcontrib-mermaid = ">=1.0.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
