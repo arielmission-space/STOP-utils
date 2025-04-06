@@ -1,5 +1,7 @@
 # STOP-utils
 
+[![Documentation Status](https://readthedocs.org/projects/stop-utils/badge/?version=latest)](https://stop-utils.readthedocs.io/en/latest/?badge=latest)
+
 Utilities for analyzing wavefront error data.
 
 ## Overview
@@ -251,6 +253,7 @@ Example workflow:
    - Optional plot generation
 
 ## Cite as
+
 ```bibtex
 @INPROCEEDINGS{2024SPIE13092E..4KB,
        author = {{Bocchieri}, Andrea and {Mugnai}, Lorenzo V. and {Pascale}, Enzo},
@@ -270,4 +273,5 @@ Example workflow:
 ```
 
 ## License
+
 This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for details.
