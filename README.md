@@ -73,16 +73,18 @@ stop_utils/
 ├── README.md
 ├── stop_utils/
 │   ├── __init__.py
-│   ├── wfe_analysis.py     # Core analysis functionality
-│   ├── visualization.py    # Plotting utilities
+│   ├── cli.py              # Typer CLI implementation
+│   ├── converters.py       # Input errormap data converters
 │   ├── types.py            # Custom types and data classes
-│   └── cli.py              # Typer CLI implementation
+│   ├── visualization.py    # Plotting utilities
+│   └── wfe_analysis.py     # Core analysis functionality
 └── tests/
     ├── __init__.py
     ├── conftest.py
-    ├── test_wfe_analysis.py
+    ├── test_cli.py
+    ├── test_converters.py
     ├── test_visualization.py
-    └── test_cli.py
+    └── test_wfe_analysis.py
 ```
 
 ## Module Descriptions
