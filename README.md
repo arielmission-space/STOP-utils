@@ -8,7 +8,7 @@ Utilities for analyzing wavefront error data.
 
 ## Overview
 
-This package provides utilities for Wavefront Error (WFE) analysis, implementing orthonormal polynomial decomposition and visualization tools. The core functionality is based on the `PAOS` package (see [readthedocs](https://paos.readthedocs.io/en/latest/)).
+This package provides utilities for Wavefront Error (WFE) analysis, implementing orthonormal polynomial decomposition and visualization tools. The core functionality is based on the `PAOS` package (see [readthedocs](https://paos.readthedocs.io/en/latest/)). The package supports both raw WFE data files and Zemax-exported Wavefront Map text files.
 
 ## Installation
 
@@ -113,6 +113,7 @@ class AnalysisConfig:
 
 1. **wfe_analysis.py**: Core functionality for WFE analysis
    - Loading and preprocessing WFE data
+   - Support for raw WFE data and Zemax Wavefront Map text files
    - Elliptical mask creation and fitting
    - Orthonormal polynomial decomposition
    - Coefficient calculation and fitting
@@ -133,8 +134,12 @@ class AnalysisConfig:
 Analyze a wavefront error data file:
 
 ```bash
-stop-utils analyze input_file.dat output_dir/
+stop-utils analyze input_file output_dir/
 ```
+
+Supported input formats:
+- Raw WFE data files (`.dat`)
+- Zemax Wavefront Map exports (`.txt`) from the "Text" button in the Wavefront Map analysis window
 
 Options:
 
@@ -145,15 +150,19 @@ Options:
 - `--help`, `-h`: Show help message
 - `--version`, `-v`: Show version information
 
-Example usage:
+Examples:
 
 ```bash
+# Analyze a raw WFE data file
 stop-utils analyze wfe.dat results/ --nzernike 21 --plot-format pdf --save-coeffs
+
+# Analyze a Zemax Wavefront Map file
+stop-utils analyze wavefront_map.txt results/ --plot-format png --format zemax
 ```
 
 ## Outputs
 
-The tool generates several outputs in the specified directory:
+The tool generates several outputs in the specified directory (where {format} is determined by the --plot-format option):
 
 - `wfe_raw.{format}`: Raw wavefront error data
 - `wfe_pttf.{format}`: Piston, tip, tilt, and focus components
@@ -230,7 +239,8 @@ Example workflow:
 
    ```mermaid
    graph TD
-      A[Input WFE Data] --> B[Preprocessing]
+      A1[Raw WFE Data] --> B[Preprocessing]
+      A2[Zemax WFE Map] --> B
       B --> C[Elliptical Fitting]
       C --> D[Polynomial Analysis]
       D --> E[Results Generation]

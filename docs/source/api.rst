@@ -27,6 +27,14 @@ Visualization (`visualization`)
    :undoc-members:
    :show-inheritance:
 
+File Format Converters (`converters`)
+-------------------------------------
+
+.. automodule:: stop_utils.converters
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Types (`types`)
 ---------------
 
