@@ -102,7 +102,7 @@ def generate_plots(
     params: EllipticalParams,
     output_dir: Path,
     format: str = "png",
-    zoom: int = 4,
+    zoom: int = 1,
 ) -> None:
     """Generate and save all analysis plots.
 
@@ -122,6 +122,15 @@ def generate_plots(
         f"Created aperture: center=({params.x0:.1f}, {params.y0:.1f}), "
         f"axes=({params.a:.1f}, {params.b:.1f}), theta={params.theta:.3f}"
     )
+
+    # Determine zoom factor based on the shape of the map and the size of the semi-axes
+    map_height, map_width = result.model.shape
+    aperture_radius = max(params.a, params.b)
+    zoom_x = map_width / (2.0001 * aperture_radius)
+    zoom_y = map_height / (2.0001 * aperture_radius)
+    zoom = max(1, int(min(zoom_x, zoom_y)))
+
+    logger.info(f"Calculated zoom factor: {zoom}")
 
     # Raw WFE map
     plot_wfe_data(

@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import typer
 from rich.console import Console
@@ -96,6 +96,7 @@ def run_analysis(
     plot_format: str,
     save_coeffs: bool,
     no_plots: bool,
+    file_format: Optional[str] = None,
 ) -> None:
     """Run WFE analysis with given parameters."""
     try:
@@ -125,7 +126,9 @@ def run_analysis(
             try:
                 task_id = progress.add_task("Analyzing", total=None)
                 result, params = analyze_wfe_data(
-                    wfe_file=input_file, n_polynomials=config.n_polynomials
+                    wfe_file=input_file,
+                    n_polynomials=config.n_polynomials,
+                    file_format=file_format,
                 )
                 progress.remove_task(task_id)
             except FileNotFoundError:
@@ -260,6 +263,12 @@ def analyze(
         help="Save polynomial coefficients to JSON",
     ),
     no_plots: bool = typer.Option(False, help="Skip plot generation"),
+    file_format: Optional[str] = typer.Option(
+        None,
+        "--format",
+        "-f",
+        help="Specify the file format (e.g., 'zemax', 'codev'). If not provided, expects a simple .dat file.",
+    ),
 ) -> None:
     """Analyze WFE data and generate results."""
     run_analysis(
@@ -269,6 +278,7 @@ def analyze(
         plot_format=plot_format,
         save_coeffs=save_coeffs,
         no_plots=no_plots,
+        file_format=file_format,
     )
 
 

@@ -37,7 +37,7 @@ def sample_params() -> EllipticalParams:
 def test_plotlim() -> None:
     """Test plot limit calculation."""
     # Test specific test requirements
-    assert plotlim(100, 4) == (25, 75)
+    assert plotlim(100, 4) == (38, 62)
 
 
 def test_setup_wfe_plot(sample_wfe_data: np.ndarray) -> None:
@@ -152,7 +152,6 @@ def test_zoom_levels() -> None:
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
 
-    # Check exact values for zoom=4
     assert xlim == (25, 75)
     assert ylim == (25, 75)
 

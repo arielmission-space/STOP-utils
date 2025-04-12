@@ -49,22 +49,22 @@ mermaid_init_js = """
 """
 
 templates_path = ["_templates"]
-exclude_patterns = []
+exclude_patterns: list[str] = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Suppress specific warnings
 suppress_warnings = [
-    'myst.xref_missing',  # Ignore missing cross-reference for LICENSE in README
-    'pygments',           # Ignore Pygments lexer warnings (like for 'mermaid')
+    "myst.xref_missing",  # Ignore missing cross-reference for LICENSE in README
+    "pygments",  # Ignore Pygments lexer warnings (like for 'mermaid')
 ]
 
 # -- Options for MyST Parser -------------------------------------------------
 # https://myst-parser.readthedocs.io/en/latest/configuration.html
 myst_enable_extensions = [
-    "colon_fence",    # Enable ::: fenced code blocks
-    "dollarmath",     # Enable inline and block math with $ and $$
-    "amsmath",        # Enable advanced math
-    "deflist",        # Enable definition lists
-    "html_image",     # Enable HTML image tags
+    "colon_fence",  # Enable ::: fenced code blocks
+    "dollarmath",  # Enable inline and block math with $ and $$
+    "amsmath",  # Enable advanced math
+    "deflist",  # Enable definition lists
+    "html_image",  # Enable HTML image tags
 ]
 
 # Configure MyST-Parser to handle code blocks
@@ -119,7 +119,7 @@ intersphinx_mapping = {
     "photutils": ("https://photutils.readthedocs.io/en/stable/", None),
     "skimage": ("https://scikit-image.org/docs/stable/", None),
     "paos": ("https://paos.readthedocs.io/en/latest/", None),
-    # 'typer': ('https://typer.tiangolo.com/', None), # URL seems problematic, disabling for now
+    "typer": ("https://typer.tiangolo.com/", None),
     "rich": ("https://rich.readthedocs.io/en/latest/", None),
     "loguru": ("https://loguru.readthedocs.io/en/stable/", None),
 }

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from loguru import logger
 
+from .converters import load_zemax_wfe
 from .types import AnalysisConfig, WFEResult
 from .visualization import generate_plots
 from .wfe_analysis import analyze_wfe_data
@@ -17,6 +18,7 @@ __all__ = [
     "analyze_wfe_data",
     "generate_plots",
     "logger",
+    "load_zemax_wfe",
 ]
 
 project = "stop-utils"

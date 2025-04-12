@@ -1,7 +1,7 @@
 """Core functionality for Wavefront Error analysis."""
 
 from pathlib import Path
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import numpy.typing as npt
@@ -10,17 +10,50 @@ from photutils.aperture import EllipticalAperture
 from skimage.measure import label, regionprops
 
 from . import logger
+from .converters import load_zemax_wfe
 from .types import EllipticalParams, WFEResult
 
 # Set logger context for analysis module
 logger = logger.bind(context="wfe_analysis")
 
 
-def load_wfe_data(file_path: Path) -> npt.NDArray[np.float64]:
-    """Load WFE data from file and convert to nanometers."""
-    logger.debug(f"Loading WFE data from {file_path}")
-    data = np.loadtxt(file_path)
-    data_nm = data * 1e9  # Convert to nm
+def load_wfe_data(
+    file_path: Path, file_format: Optional[str] = None
+) -> npt.NDArray[np.float64]:
+    """Load WFE data from file and convert to nanometers.
+    Handles different formats based on the provided format string or defaults to generic.
+    """
+    logger.debug(f"Loading WFE data from {file_path}, specified format: {file_format}")
+
+    if file_format:
+        format_lower = file_format.lower()
+        if format_lower == "zemax":
+            logger.info("Using specified Zemax file format.")
+            data_nm = load_zemax_wfe(str(file_path))
+        # elif format_lower == "codev":
+        #     logger.info("Using specified CODEV file format.")
+        #     data_nm = load_codev_wfe(str(file_path))
+        # Add elif blocks here for other formats
+        # elif format_lower == "some_other_format":
+        #     data_nm = load_some_other_format(file_path)
+        else:
+            raise ValueError(f"Unsupported file format specified: '{file_format}'")
+    else:
+        # Default to generic format if not specified
+        logger.warning(
+            "File format not specified, defaulting to generic .dat format. "
+            "Use --format to specify a different format (e.g., --format zemax)."
+        )
+        try:
+            data = np.loadtxt(file_path)
+            data_nm = data * 1e9  # Convert to nm
+        except Exception as e:
+            logger.error(f"Failed to load {file_path} as generic format: {e}")
+            logger.error(
+                "Check the file content or specify the correct format with --format."
+            )
+            raise
+
     logger.debug(
         f"Loaded data shape: {data_nm.shape}, range: [{data_nm.min():.2f}, {data_nm.max():.2f}] nm"
     )
@@ -155,13 +188,16 @@ def fit_polynomials(
 
 
 def analyze_wfe_data(
-    wfe_file: Path, n_polynomials: int = 15
+    wfe_file: Path,
+    n_polynomials: int = 15,
+    file_format: Optional[str] = None,
 ) -> Tuple[WFEResult, EllipticalParams]:
     """Analyze WFE data file.
 
     Args:
         wfe_file: Path to WFE data file
         n_polynomials: Number of polynomials to use
+        file_format: The format of the input file (e.g., 'zemax').
 
     Returns:
         tuple: (WFEResult object, EllipticalParams object)
@@ -173,9 +209,9 @@ def analyze_wfe_data(
     if not wfe_file.exists():
         raise FileNotFoundError(f"WFE data file not found: {wfe_file}")
 
-    # Load and preprocess data
+    # Load and preprocess data using the updated loader with format
     logger.info(f"Analyzing WFE data from {wfe_file}")
-    errormap = load_wfe_data(wfe_file)
+    errormap = load_wfe_data(wfe_file, file_format)  # Pass format here
     errormap_ma = np.ma.masked_where(errormap == 0, errormap)
 
     # Create mask and find elliptical aperture
