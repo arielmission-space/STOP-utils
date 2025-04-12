@@ -140,6 +140,7 @@ stop-utils analyze input_file output_dir/
 ```
 
 Supported input formats:
+
 - Raw WFE data files (`.dat`)
 - Zemax Wavefront Map exports (`.txt`) from the "Text" button in the Wavefront Map analysis window
 
@@ -195,45 +196,51 @@ make clean        # Remove Python cache files and build artifacts
 Example workflow:
 
 1. Set up development environment:
+
     ```bash
     make install
     ```
 
 2. Make your changes and format the code:
+
     ```bash
     make format
     ```
 
 3. Run type checking and tests:
+
     ```bash
     make check
     make test
     ```
 
 4. Clean up before committing:
+
     ```bash
     make clean
     ```
-    
-    ### Building Documentation
-    
-    To build the documentation locally:
-    
-    1.  Install the documentation dependencies:
-        ```bash
-        poetry install --with docs
-        # or using make:
-        # make install-docs
-        ```
-    
-    2.  Build the HTML documentation:
-        ```bash
-        make docs
-        # or manually:
-        # sphinx-build -b html docs/source docs/build/html
-        ```
-    
-    The generated HTML files will be in the `docs/build/html` directory. Open `docs/build/html/index.html` in your browser to view the documentation.
+
+### Building Documentation
+
+To build the documentation locally:
+
+1. Install the documentation dependencies:
+
+    ```bash
+    poetry install --with docs
+    # or using make:
+    # make install-docs
+    ```
+
+2. Build the HTML documentation:
+
+    ```bash
+    make docs
+    # or manually:
+    # sphinx-build -b html docs/source docs/build/html
+    ```
+
+The generated HTML files will be in the `docs/build/html` directory. Open `docs/build/html/index.html` in your browser to view the documentation.
 
 ## Implementation Notes
 
