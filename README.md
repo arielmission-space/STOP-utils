@@ -85,6 +85,7 @@ stop_utils/
     ├── test_converters.py
     ├── test_visualization.py
     └── test_wfe_analysis.py
+```
 
 ### Zemax Integration
 
