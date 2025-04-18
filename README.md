@@ -93,7 +93,7 @@ The `zemax/` submodule provides tools for interfacing with Zemax OpticStudio thr
 ```bash
 stop_utils/zemax/
 ├── __init__.py
-├── zemax_wfe.py           # Core ZOS-API interface
+├── zmx_boilerplate.py     # Core ZOS-API interface
 ├── wavefront_extractor.py # Wavefront map extraction
 └── zmx_batch_processor.py # Batch processing utility
 ```
