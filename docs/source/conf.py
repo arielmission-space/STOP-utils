@@ -3,9 +3,12 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import importlib.metadata as metadata
 import os
+import platform
 import sys
 from datetime import date
+from unittest.mock import MagicMock
 
 # -- Path setup --------------------------------------------------------------
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -14,13 +17,28 @@ from datetime import date
 #
 sys.path.insert(0, os.path.abspath("../../"))  # Add project root to path
 
+# Mock Windows-only modules for docs build
+if platform.system() != "Windows":
+    class Mock(MagicMock):
+        @classmethod
+        def __getattr__(cls, name):
+            return MagicMock()
+
+    MOCK_MODULES = [
+        'winreg',
+        'clr',
+        'ZOSAPI',
+        'ZOSAPI_NetHelper',
+        'ZOSAPI_Interfaces'
+    ]
+    for mod_name in MOCK_MODULES:
+        sys.modules[mod_name] = Mock()
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "stop-utils"
 copyright = f"2025-{date.today().year:d}, arielmission-space"
-
-import importlib.metadata as metadata
 
 version = metadata.version(project)
 author = metadata.metadata(project)["Author"]
@@ -53,7 +71,8 @@ exclude_patterns: list[str] = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Suppress specific warnings
 suppress_warnings = [
-    "myst.xref_missing",  # Ignore missing cross-reference for LICENSE in README
+    # Ignore missing cross-reference for LICENSE in README
+    "myst.xref_missing",
     "pygments",  # Ignore Pygments lexer warnings (like for 'mermaid')
 ]
 
@@ -81,7 +100,8 @@ html_theme_options = {
     "navigation_depth": 2,  # Show two levels in the sidebar
     "collapse_navigation": False,  # Don't collapse sidebar sections
     "sticky_navigation": True,
-    "titles_only": False,  # Explicitly keep default behavior (toctree titles can differ from page titles)
+    # Explicitly keep default behavior (toctree titles can differ from page titles)
+    "titles_only": False,
 }
 
 # -- Options for autodoc -----------------------------------------------------

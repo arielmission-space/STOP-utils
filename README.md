@@ -85,6 +85,38 @@ stop_utils/
     ├── test_converters.py
     ├── test_visualization.py
     └── test_wfe_analysis.py
+
+### Zemax Integration
+
+The `zemax/` submodule provides tools for interfacing with Zemax OpticStudio through its ZOS-API:
+
+```bash
+stop_utils/zemax/
+├── __init__.py
+├── zemax_wfe.py           # Core ZOS-API interface
+├── wavefront_extractor.py # Wavefront map extraction
+└── zmx_batch_processor.py # Batch processing utility
+```
+
+Key features:
+
+- Direct integration with Zemax OpticStudio via ZOS-API
+- Automated wavefront map extraction from Zemax files
+- Batch processing capabilities for multiple Zemax files
+- Support for custom wavelength and surface selection
+- Automated visualization of wavefront maps
+
+Requirements:
+
+- Zemax OpticStudio (Premium, Professional, or Standard Edition)
+- Python.NET (pythonnet) package
+- Valid Zemax license for API use
+
+Usage example:
+
+```bash
+# Batch process multiple Zemax files
+python -m stop_utils.zemax.zmx_batch_processor --base_folder /path/to/zemax/files --surface_name EXPP --wavelength_um 0.633
 ```
 
 ## Module Descriptions

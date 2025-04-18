@@ -1,11 +1,14 @@
 # wavefront_extractor.py
-import clr, os, winreg
-from itertools import islice
-import numpy as np
+import os
+import winreg
 from datetime import datetime
-import matplotlib.pyplot as plt
+from itertools import islice
 
-from zemax_wfe import *
+import clr
+import matplotlib.pyplot as plt
+import numpy as np
+
+from stop_utils.zemax.zmx_boilerplate import *
 
 
 def process_single_file(
@@ -140,7 +143,6 @@ def process_single_file(
 
 
 if __name__ == "__main__":
-
     base_folder = (
         r"C:\Users\abocc\OneDrive - uniroma1.it\Andrea\work\Sap\Projects\zemax"
     )

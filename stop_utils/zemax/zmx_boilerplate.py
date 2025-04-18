@@ -1,5 +1,8 @@
-import clr, os, winreg
+import os
+import winreg
 from itertools import islice
+
+import clr
 
 # This boilerplate requires the 'pythonnet' module.
 # The following instructions are for installing the 'pythonnet' module via pip:
