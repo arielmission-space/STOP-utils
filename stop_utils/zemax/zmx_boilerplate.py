@@ -1,4 +1,20 @@
 import os
+import sys
+import platform
+from unittest.mock import MagicMock
+
+# Mock Windows-only modules for docs build
+if platform.system() != "Windows":
+
+    class Mock(MagicMock):
+        @classmethod
+        def __getattr__(cls, name):
+            return MagicMock()
+
+    MOCK_MODULES = ["winreg", "clr", "ZOSAPI", "ZOSAPI_NetHelper", "ZOSAPI_Interfaces"]
+    for mod_name in MOCK_MODULES:
+        sys.modules[mod_name] = Mock()
+
 import winreg
 from itertools import islice
 

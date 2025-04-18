@@ -5,7 +5,6 @@
 
 import importlib.metadata as metadata
 import os
-import platform
 import sys
 from datetime import date
 from unittest.mock import MagicMock
@@ -16,18 +15,6 @@ from unittest.mock import MagicMock
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 sys.path.insert(0, os.path.abspath("../../"))  # Add project root to path
-
-# Mock Windows-only modules for docs build
-if platform.system() != "Windows":
-
-    class Mock(MagicMock):
-        @classmethod
-        def __getattr__(cls, name):
-            return MagicMock()
-
-    MOCK_MODULES = ["winreg", "clr", "ZOSAPI", "ZOSAPI_NetHelper", "ZOSAPI_Interfaces"]
-    for mod_name in MOCK_MODULES:
-        sys.modules[mod_name] = Mock()
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
