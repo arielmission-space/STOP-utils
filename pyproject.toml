@@ -19,10 +19,10 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 numpy = "^1.24.0"
 matplotlib = "^3.7.0"
-scikit-image = "^0.21.0"
+scikit-image = "^0.25.0"
 photutils = "^1.7.0"
 paos = "^1.2.7"
 typer = {extras = ["all"], version = "^0.9.0"}
