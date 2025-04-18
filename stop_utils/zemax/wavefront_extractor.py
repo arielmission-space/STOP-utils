@@ -13,7 +13,7 @@ def process_single_file(
     base_folder,
     output_dir="WavefrontOutputs",
     surface_name="EXPP",
-    custom_wavelength_um=0.633,
+    wavelength_um=0.633,
 ):
     """
     Process a single Zemax file and extract wavefront data.
@@ -23,7 +23,7 @@ def process_single_file(
         base_folder (str): Base folder for output
         output_dir (str): Directory for output files
         surface_name (str): Name of the surface to analyze
-        custom_wavelength (float): Custom wavelength in micrometers to use
+        wavelength_um (float): Wavelength in micrometers to use
     """
     zos = PythonStandaloneApplication()
 
@@ -43,10 +43,11 @@ def process_single_file(
         wavelength_data = TheSystem.SystemData.Wavelengths
 
         # Process wavelength selection
-        if custom_wavelength_um is not None:
-            # Add a new wavelength
-            print(f"Using custom wavelength of {custom_wavelength_um} micron")
-            wavelength_data.GetWavelength(1).Wavelength = custom_wavelength_um
+        if wavelength_um is not None:
+            print(f"Using custom wavelength of {wavelength_um} micron")
+            wavelength_data.GetWavelength(1).Wavelength = wavelength_um
+        else:
+            wavelength_um = wavelength_data.GetWavelength(1).Wavelength
 
         # === Setup Wavefront Map Analysis ===
         analysis = TheSystem.Analyses.New_Analysis(
@@ -103,33 +104,7 @@ def process_single_file(
         wfe_map = np.asarray(reshaped_data)
 
         # === Save to txt file
-        wavelength_um = wavelength_data.GetWavelength(1).Wavelength  # in microns
-        field_data = TheSystem.SystemData.Fields
-
-        # Use primary wavelength and first field
-        field_x = field_data.GetField(1).X  # in degrees
-        field_y = field_data.GetField(1).Y  # in degrees
-
-        # Exit pupil diameter
-        exit_pupil_diameter = TheSystem.SystemData.Aperture.ApertureValue  # in mm
-
-        # data stats
-        wfe_masked = np.ma.MaskedArray(wfe_map, mask=np.isnan(wfe_map))
-        ptp = np.ma.ptp(wfe_masked)
-        rms = np.ma.std(wfe_masked)
-
-        save_wavefront_map_txt(
-            filepath=os.path.join(base_folder, output_dir, f"{zemax_filename}.txt"),
-            wavefront_data=wfe_masked.filled(0.0),
-            wavelength_um=wavelength_um,
-            field_x=field_x,
-            field_y=field_y,
-            peak_to_valley=ptp,
-            rms=rms,
-            surface_number=surface_number,
-            surface_name=surface_name,
-            exit_pupil_diameter=exit_pupil_diameter,
-        )
+        results.GetTextFile(f"{base_folder}\\{output_dir}\\{zemax_filename}.txt")
 
         # === Optional: create and save visualization
         plt.figure(figsize=(8, 6))
@@ -179,5 +154,5 @@ if __name__ == "__main__":
         base_folder=base_folder,
         output_dir="WavefrontOutputs",
         surface_name="EXPP",
-        custom_wavelength_um=0.633,
+        wavelength_um=0.633,
     )

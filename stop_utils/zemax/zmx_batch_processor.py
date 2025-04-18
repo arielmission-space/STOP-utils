@@ -15,7 +15,7 @@ def main():
                         help='Directory to save output files (default: WavefrontOutputs)')
     parser.add_argument('--surface_name', type=str, default='EXPP',
                         help='Surface name to look for (default: EXPP)')
-    parser.add_argument('--custom_wavelength', type=float,
+    parser.add_argument('--wavelength_um', type=float,
                         help='Custom wavelength in micrometers to use')
     
     args = parser.parse_args()
@@ -33,7 +33,6 @@ def main():
     os.makedirs(os.path.join(args.base_folder, args.output_dir), exist_ok=True)
     
     # Import the wavefront extraction module
-    # Adjust the import based on your actual file name
     try:
         # First, make sure the directory with your script is in sys.path
         sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -55,7 +54,7 @@ def main():
                 base_folder=args.base_folder,
                 output_dir=args.output_dir,
                 surface_name=args.surface_name,
-                custom_wavelength_um=args.custom_wavelength,
+                wavelength_um=args.wavelength_um,
             )
         except Exception as e:
             print(f"Error processing {file_name}: {str(e)}")
