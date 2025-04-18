@@ -1,6 +1,6 @@
 import os
-import sys
 import platform
+import sys
 from unittest.mock import MagicMock
 
 # Mock Windows-only modules for docs build

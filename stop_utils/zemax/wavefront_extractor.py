@@ -1,10 +1,12 @@
 # wavefront_extractor.py
 import os
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .zmx_boilerplate import *
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from zmx_boilerplate import *
 
 
 def process_single_file(
@@ -114,10 +116,9 @@ def process_single_file(
             interpolation="none",
         )
         plt.colorbar(label="Wavefront [nm]")
-        title = "\n".join([
-            f"{zemax_filename}",
-            f"Wavefront Map at Surface {surface_name}"
-        ])
+        title = "\n".join(
+            [f"{zemax_filename}", f"Wavefront Map at Surface {surface_name}"]
+        )
         plt.title(title)
         plt.xlabel("X Index")
         plt.ylabel("Y Index")
