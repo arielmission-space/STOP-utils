@@ -176,7 +176,7 @@ The tool generates several outputs in the specified directory (where {format} is
 
 ## Requirements
 
-- Python ≥ 3.9
+- Python ≥ 3.10
 - Dependencies in `pyproject.toml`
 
 ## Development
