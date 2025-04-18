@@ -118,7 +118,11 @@ def process_single_file(
             interpolation="none",
         )
         plt.colorbar(label="Wavefront [nm]")
-        plt.title(f"{zemax_filename} \nWavefront Map at Surface {surface_name}")
+        title = "\n".join([
+            f"{zemax_filename}",
+            f"Wavefront Map at Surface {surface_name}"
+        ])
+        plt.title(title)
         plt.xlabel("X Index")
         plt.ylabel("Y Index")
 
