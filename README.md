@@ -117,7 +117,7 @@ Usage example:
 
 ```bash
 # Batch process multiple Zemax files
-python -m stop_utils.zemax.zmx_batch_processor --base_folder /path/to/zemax/files --surface_name EXPP --wavelength_um 0.633
+python zmx_batch_processor.py --base_folder /path/to/zemax/files --surface_name EXPP --wavelength_um 0.633
 ```
 
 ## Module Descriptions
