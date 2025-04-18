@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from stop_utils.zemax.zmx_boilerplate import *
+from .zmx_boilerplate import *
 
 
 def process_single_file(
