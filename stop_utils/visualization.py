@@ -46,7 +46,7 @@ def setup_wfe_plot(
     Returns:
         tuple: (Figure object, Axes object)
     """
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(figsize=(7, 6))
     im = ax.imshow(data, origin="lower", cmap=cmap)
     plt.colorbar(im, ax=ax)
 
@@ -69,7 +69,7 @@ def plot_wfe_data(
     title: str = "Wavefront Error Map",
     output_path: Optional[Path] = None,
     zoom: int = 4,
-    cmap: str = "jet",
+    cmap: str = "gray_r",
 ) -> None:
     """Plot WFE data with optional aperture overlay.
 
