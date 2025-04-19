@@ -134,7 +134,7 @@ def generate_plots(
 
     # Raw WFE map
     plot_wfe_data(
-        result.model + result.residual,
+        result.raw,
         aperture=aperture,
         title="Raw Wavefront Error",
         output_path=output_dir / f"wfe_raw.{format}",
