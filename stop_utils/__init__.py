@@ -28,7 +28,7 @@ __pkg_name__ = __title__ = metadata.metadata(project)["Name"].upper()
 __version__ = metadata.version(project)
 __url__ = metadata.metadata(project)["Project-URL"]
 __author__ = metadata.metadata(project)["Author"]
-__license__ = metadata.metadata(project)["License"]
+__license__ = metadata.metadata(project).get("License", None)
 __copyright__ = f"2025-{date.today().year:d}, {__author__}"
 __summary__ = metadata.metadata(project)["Summary"]
 
