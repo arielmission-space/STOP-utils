@@ -259,7 +259,7 @@ def analyze(
     ),
     save_coeffs: bool = typer.Option(
         True,
-        "--save-coeffs",
+        "--save-coeffs/--no-save-coeffs",
         help="Save polynomial coefficients to JSON",
     ),
     no_plots: bool = typer.Option(
