@@ -91,6 +91,8 @@ def load_zemax_wfe(file_path: Union[str, Path]) -> np.ndarray:
 
         # Reshape the data according to the grid size found in the header
         wfe_data_waves = wfe_data_waves.reshape(grid_size)
+        # flip the data upside down to match the expected orientation
+        wfe_data_waves = np.flipud(wfe_data_waves)
 
     except Exception as e:
         raise ValueError(f"Error parsing data in {file_path}: {e}") from e
