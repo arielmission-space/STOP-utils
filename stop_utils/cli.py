@@ -6,7 +6,7 @@ from typing import List, Optional
 
 import typer
 
-from . import __version__, logger, LOG_FORMAT
+from . import project, __version__, logger, LOG_FORMAT
 from .types import AnalysisConfig, EllipticalParams
 from .visualization import generate_plots
 from .wfe_analysis import analyze_wfe_data
@@ -117,6 +117,7 @@ def run_analysis(
         )
 
         logger.log("ANNOUNCE", "Analysis started.")
+        logger.info(f"Running {project} v{__version__}")
 
         # Analyze WFE data
         try:
