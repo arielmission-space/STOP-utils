@@ -307,7 +307,7 @@ The generated HTML files will be in the `docs/build/html` directory. Open `docs/
 3. Error Handling:
    - Input validation
    - Graceful failure for invalid data
-   - Clear error messages via Rich console
+   - Clear error messages via Typer
 
 4. Performance Considerations:
    - Efficient numpy operations
