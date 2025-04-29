@@ -78,6 +78,8 @@ def test_load_zemax_wfe(tmp_path: Path) -> None:
     assert wfe.shape == (2, 2)
     # Convert expected waves to nm (multiply by wavelength and 1000)
     expected = (
-        np.flipud(np.array([[-0.123456, -0.234567], [-0.345678, -0.456789]])) * 1.0649 * 1000
+        np.flipud(np.array([[-0.123456, -0.234567], [-0.345678, -0.456789]]))
+        * 1.0649
+        * 1000
     )
     np.testing.assert_array_almost_equal(wfe, expected)
