@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stop-utils"
-version = "0.5.2"
+version = "0.5.3"
 description = "Utilities for analyzing wavefront error data"
 authors = ["Andrea Bocchieri <andrea.bocchieri@uniroma1.it>"]
 readme = "README.md"
