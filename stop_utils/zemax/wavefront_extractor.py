@@ -65,13 +65,13 @@ def process_single_file(
             if comment.upper() == surface_name:
                 surface_number = i
                 surface_found = True
-                print(
+                logger.info(
                     f"Found surface with comment '{comment}' at surface number {surface_number}"
                 )
                 break
 
         if not surface_found:
-            print(f"Surface '{surface_name}' not found in {zemax_filename}")
+            logger.error(f"Surface '{surface_name}' not found in {zemax_filename}")
             zos.CloseFile(False)
             return
 
@@ -131,7 +131,7 @@ def process_single_file(
         plt.savefig(plot_path)
         plt.close()  # Close the figure to free memory
 
-        print(f"Processed {zemax_filename} successfully")
+        logger.info(f"Processed {zemax_filename} successfully")
 
     finally:
         # Always close the file and clean up
