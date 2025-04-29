@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stop-utils"
-version = "0.5.1"
+version = "0.5.2"
 description = "Utilities for analyzing wavefront error data"
 authors = ["Andrea Bocchieri <andrea.bocchieri@uniroma1.it>"]
 readme = "README.md"
@@ -26,7 +26,7 @@ matplotlib = "^3.7.0"
 scikit-image = "^0.25.0"
 photutils = "^1.7.0"
 paos = "^1.2.8"
-typer = {extras = ["all"], version = "^0.9.0"}
+typer = "^0.9.0"
 loguru = "^0.7.2"
 
 [tool.poetry.group.zemax.dependencies]
