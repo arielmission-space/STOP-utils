@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+from stop_utils import logger
 from stop_utils.zemax.zmx_boilerplate import PythonStandaloneApplication
 
 
@@ -43,7 +44,7 @@ def process_single_file(
 
         # Process wavelength selection
         if wavelength_um is not None:
-            print(f"Using custom wavelength of {wavelength_um} micron")
+            logger.info(f"Using custom wavelength of {wavelength_um} micron")
             wavelength_data.GetWavelength(1).Wavelength = wavelength_um
         else:
             wavelength_um = wavelength_data.GetWavelength(1).Wavelength

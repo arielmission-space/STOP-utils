@@ -35,7 +35,7 @@ def batch_process_zmx(
 
     for i, zmx_file_path in enumerate(zmx_files):
         file_name = Path(zmx_file_path).stem
-        logger.info(f"\nProcessing file {i+1}/{len(zmx_files)}: {file_name}")
+        logger.info(f"Processing file {i+1}/{len(zmx_files)}: {file_name}")
         try:
             process_single_file(
                 zemax_file_path=zmx_file_path,
