@@ -1,10 +1,11 @@
 import glob
 import os
-import sys
 from pathlib import Path
 from typing import Optional
 
 import typer
+
+from stop_utils.zemax.wavefront_extractor import process_single_file
 
 
 def batch_process_zmx(
@@ -38,27 +39,11 @@ def batch_process_zmx(
     output_path = os.path.join(base_folder, output_dir)
     os.makedirs(output_path, exist_ok=True)
 
-    try:
-        sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-        from wavefront_extractor import process_single_file
-    except ImportError as exc:
-        typer.secho(
-            "Error: Could not import the wavefront_extractor module.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        typer.echo(
-            "Make sure wavefront_extractor.py is in the same directory as this script."
-        )
-        raise typer.Exit(code=1) from exc
-
     for i, zmx_file_path in enumerate(zmx_files):
         file_name = Path(zmx_file_path).stem
-        typer.echo(
-            typer.style(
-                f"\n[bold yellow]Processing file {i+1}/{len(zmx_files)}:[/] {file_name}",
-                bold=True,
-            )
+        typer.secho(
+            f"\nProcessing file {i+1}/{len(zmx_files)}:[/] {file_name}",
+            fg=typer.colors.YELLOW,
         )
         try:
             process_single_file(

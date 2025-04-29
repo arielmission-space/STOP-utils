@@ -1,12 +1,10 @@
 # wavefront_extractor.py
 import os
-import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from zmx_boilerplate import *
+from stop_utils.zemax.zmx_boilerplate import PythonStandaloneApplication
 
 
 def process_single_file(
