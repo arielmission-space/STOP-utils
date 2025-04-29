@@ -113,12 +113,22 @@ Requirements:
 - Python.NET (pythonnet) package
 - Valid Zemax license for API use
 
-Usage example:
+#### Usage
+
+A dedicated CLI entry point is provided for batch processing Zemax files:
 
 ```bash
-# Batch process multiple Zemax files
-python zmx_batch_processor.py --base_folder /path/to/zemax/files --surface_name EXPP --wavelength_um 0.633
+stop-utils zmx-batch --base_folder /path/to/zemax/files --output-dir /path/to/output/dir --surface_name EXPP --wavelength_um 0.633
 ```
+
+This command processes all `.zmx` files in the specified folder, extracting wavefront maps for the given surface and wavelength. Output files are saved in the specified output directory.
+
+**Options:**
+
+- `--base_folder`, `-b`: Directory containing `.zmx` files (required)
+- `--output_dir`, `-o`: Directory to save output files (required)
+- `--surface_name`, `-s`: Surface name to process (default: `EXPP`)
+- `--wavelength_um`, `-w`: Custom wavelength in micrometers
 
 ## Module Descriptions
 
@@ -281,13 +291,11 @@ The generated HTML files will be in the `docs/build/html` directory. Open `docs/
 
    ```mermaid
    graph TD
-      A1[Raw WFE Data] --> B[Preprocessing]
-      A2[Zemax WFE Map] --> B
-      B --> C[Elliptical Fitting]
-      C --> D[Polynomial Analysis]
-      D --> E[Results Generation]
-      E --> F[Plot Output]
-      E --> G[Coefficient Output]
+      A[CLI/Input File] --> B[Load WFE Data]
+      B --> C[Detect Elliptical Aperture]
+      C --> D[Fit Orthonormal Polynomials]
+      E --> F[Generate Results & Plots]
+      E --> G[Output Directory/Logs]
    ```
 
 2. Core Functions:
