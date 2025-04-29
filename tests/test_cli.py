@@ -15,12 +15,11 @@ def test_analyze_wfe_basic(sample_wfe_file: Path, temp_output_dir: Path) -> None
     """Test basic WFE analysis command."""
     result = runner.invoke(
         app,
-        ["analyze", str(sample_wfe_file), str(temp_output_dir)],
+        ["analyze", "-i", str(sample_wfe_file), "-o", str(temp_output_dir)],
         standalone_mode=False,
     )
 
     assert result.exit_code == 0
-    assert "Analysis complete!" in result.stdout
 
     # Check output files
     assert (temp_output_dir / "wfe_raw.png").exists()
@@ -31,7 +30,14 @@ def test_analyze_wfe_no_plots(sample_wfe_file: Path, temp_output_dir: Path) -> N
     """Test analysis with plot generation disabled."""
     result = runner.invoke(
         app,
-        ["analyze", str(sample_wfe_file), str(temp_output_dir), "--no-plots"],
+        [
+            "analyze",
+            "-i",
+            str(sample_wfe_file),
+            "-o",
+            str(temp_output_dir),
+            "--no-plots",
+        ],
         standalone_mode=False,
     )
 
@@ -46,7 +52,15 @@ def test_analyze_wfe_custom_format(
     """Test analysis with custom plot format."""
     result = runner.invoke(
         app,
-        ["analyze", str(sample_wfe_file), str(temp_output_dir), "--plot-format", "pdf"],
+        [
+            "analyze",
+            "-i",
+            str(sample_wfe_file),
+            "-o",
+            str(temp_output_dir),
+            "--plot-format",
+            "pdf",
+        ],
         standalone_mode=False,
     )
 
@@ -60,7 +74,15 @@ def test_analyze_wfe_custom_polynomials(
     """Test analysis with custom number of polynomials."""
     result = runner.invoke(
         app,
-        ["analyze", str(sample_wfe_file), str(temp_output_dir), "--npolynomials", "11"],
+        [
+            "analyze",
+            "-i",
+            str(sample_wfe_file),
+            "-o",
+            str(temp_output_dir),
+            "--npolynomials",
+            "11",
+        ],
         standalone_mode=False,
     )
 
@@ -68,7 +90,7 @@ def test_analyze_wfe_custom_polynomials(
 
     # Check coefficient count, units, and ellipse parameters
     coeff_file = temp_output_dir / "polynomial_coefficients.json"
-    with open(coeff_file) as f:
+    with open(coeff_file, encoding="utf-8") as f:
         data = json.load(f)
         # Check coefficients
         assert len(data["orthonormal_coefficients"]) == 11
@@ -104,7 +126,14 @@ def test_analyze_wfe_no_coeffs(sample_wfe_file: Path, temp_output_dir: Path) -> 
     """Test analysis without saving coefficients."""
     result = runner.invoke(
         app,
-        ["analyze", str(sample_wfe_file), str(temp_output_dir), "--no-save-coeffs"],
+        [
+            "analyze",
+            "-i",
+            str(sample_wfe_file),
+            "-o",
+            str(temp_output_dir),
+            "--no-save-coeffs",
+        ],
         standalone_mode=False,
     )
 
@@ -114,10 +143,10 @@ def test_analyze_wfe_no_coeffs(sample_wfe_file: Path, temp_output_dir: Path) -> 
 
 def test_analyze_wfe_invalid_input() -> None:
     """Test error handling for invalid input file."""
-    result = runner.invoke(app, ["analyze", "nonexistent.dat", "output/"])
+    non_existent_file = "nonexistent.dat"
+    result = runner.invoke(app, ["analyze", "-i", non_existent_file, "-o", "output/"])
 
-    assert result.exit_code == 2  # Typer exit code for argument validation error
-    assert "does not exist" in result.stderr
+    assert result.exit_code == 1  # Typer exit code for option validation error
 
 
 def test_analyze_wfe_invalid_format(
@@ -145,7 +174,15 @@ def test_analyze_wfe_invalid_npolynomials(
     """Test error handling for invalid number of polynomials."""
     result = runner.invoke(
         app,
-        ["analyze", str(sample_wfe_file), str(temp_output_dir), "--npolynomials", "0"],
+        [
+            "analyze",
+            "-i",
+            str(sample_wfe_file),
+            "-o",
+            str(temp_output_dir),
+            "--npolynomials",
+            "0",
+        ],
     )
 
     assert result.exit_code == 2  # Typer exit code for invalid parameter

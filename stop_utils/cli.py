@@ -5,14 +5,12 @@ from pathlib import Path
 from typing import List, Optional
 
 import typer
-from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.table import Table
 
-from . import __version__, logger
+from . import __version__, logger, LOG_FORMAT
 from .types import AnalysisConfig, EllipticalParams
 from .visualization import generate_plots
 from .wfe_analysis import analyze_wfe_data
+from .zemax.zmx_batch_processor import batch_process_zmx
 
 # Set logger context for CLI
 logger = logger.bind(context="cli")
@@ -25,25 +23,27 @@ def version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-# Create console for output
-console = Console()
+def print_coeffs(coefficients: List[float], zernikes: List[float]) -> None:
+    """Logs polynomial coefficients line by line."""
 
+    logger.info("Polynomial coefficients:")
+    logger.info("ordering=standard, normalize=False")
 
-def create_coefficients_table(
-    coefficients: List[float], zernikes: List[float]
-) -> Table:
-    """Create a rich table displaying polynomial coefficients."""
-    table = Table(
-        title="Polynomial Coefficients (standard ordering, normalize = False)"
-    )
-    table.add_column("Mode", justify="center", style="cyan")
-    table.add_column("Orthonormal Coefficient (nm)", justify="right", style="green")
-    table.add_column("Zernike Coefficient (nm)", justify="right", style="green")
+    logger.info("Mode | Orthon. (nm) | Zernike (nm)")
+    logger.info("----------------------------------")
 
+    if len(coefficients) != len(zernikes):
+        logger.warning(
+            f"Mismatch in list lengths: {len(coefficients)} coefficients vs {len(zernikes)} Zernikes. "
+            "Logging pairs up to the shorter list."
+        )
+        # zip will automatically stop at the shorter list, but the warning is good practice
+
+    # Log each coefficient pair on its own line
     for i, (coeff, zern) in enumerate(zip(coefficients, zernikes)):
-        table.add_row(str(i), f"{coeff:.3f}", f"{zern:.3f}")
-
-    return table
+        # Format each line clearly identifying the mode and values
+        logger.info(f"  {i:>2} | {coeff:>12.3f} | {zern:>12.3f}")
+        # Adjust spacing (e.g., :>2, :>8.3f) as needed for alignment based on expected number ranges
 
 
 def save_coefficients(
@@ -54,7 +54,7 @@ def save_coefficients(
 ) -> None:
     """Save polynomial coefficients and ellipse parameters to JSON file."""
     coeff_file = output_dir / "polynomial_coefficients.json"
-    with open(coeff_file, "w") as f:
+    with open(coeff_file, "w", encoding="utf-8") as f:
         json.dump(
             {
                 "orthonormal_coefficients": [
@@ -103,9 +103,9 @@ def run_analysis(
         # Create output directory
         try:
             output_dir.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            logger.error(f"Failed to create output directory: {e}")
-            raise typer.Exit(1)
+        except Exception as exc:
+            logger.error(f"Failed to create output directory: {exc}")
+            raise typer.Exit(1) from exc
 
         # Create configuration
         config = AnalysisConfig(
@@ -116,96 +116,86 @@ def run_analysis(
             output_dir=output_dir,
         )
 
-        with Progress(
-            SpinnerColumn(),
-            TextColumn(" {task.description:<12}"),  # Left-aligned, fixed width, no dots
-            console=console,
-            transient=False,  # Keep tasks visible for better feedback
-        ) as progress:
-            # Analyze WFE data
+        logger.log("ANNOUNCE", "Analysis started.")
+
+        # Analyze WFE data
+        try:
+            result, params = analyze_wfe_data(
+                wfe_file=input_file,
+                n_polynomials=config.n_polynomials,
+                file_format=file_format,
+            )
+        except FileNotFoundError as exc:
+            logger.error(f"Input file not found: {input_file}")
+            raise typer.Exit(1) from exc
+        except Exception as exc:
+            logger.error(f"Analysis failed: {exc}")
+            raise typer.Exit(1) from exc
+
+        # Save coefficients if requested
+        if config.save_coeffs:
             try:
-                task_id = progress.add_task("Analyzing", total=None)
-                result, params = analyze_wfe_data(
-                    wfe_file=input_file,
-                    n_polynomials=config.n_polynomials,
-                    file_format=file_format,
+                coeff_list = [float(c) for c in result.coefficients]
+                zernikes_list = [float(c) for c in result.zernikes]
+                save_coefficients(
+                    config.output_dir, coeff_list, zernikes_list, params
                 )
-                progress.remove_task(task_id)
-            except FileNotFoundError:
-                logger.error(f"Input file not found: {input_file}")
-                raise typer.Exit(1)
-            except Exception as e:
-                logger.error(f"Analysis failed: {e}")
-                raise typer.Exit(1)
+            except Exception as exc:
+                logger.error(f"Failed to save coefficients: {exc}")
+                raise typer.Exit(1) from exc
 
-            # Save coefficients if requested
-            if config.save_coeffs:
-                try:
-                    task_id = progress.add_task("Saving", total=None)
-                    coeff_list = [float(c) for c in result.coefficients]
-                    zernikes_list = [float(c) for c in result.zernikes]
-                    save_coefficients(
-                        config.output_dir, coeff_list, zernikes_list, params
-                    )
-                    progress.remove_task(task_id)
-                except Exception as e:
-                    logger.error(f"Failed to save coefficients: {e}")
-                    raise typer.Exit(1)
+        # Generate plots if requested
+        if config.generate_plots:
+            try:
+                generate_plots(
+                    result=result,
+                    params=params,
+                    output_dir=config.output_dir,
+                    format=config.plot_format,
+                )
+            except Exception as exc:
+                logger.error(f"Failed to generate plots: {exc}")
+                raise typer.Exit(1) from exc
 
-            # Generate plots if requested
-            if config.generate_plots:
-                try:
-                    task_id = progress.add_task("Plotting", total=None)
-                    generate_plots(
-                        result=result,
-                        params=params,
-                        output_dir=config.output_dir,
-                        format=config.plot_format,
-                    )
-                    progress.remove_task(task_id)
-                except Exception as e:
-                    logger.error(f"Failed to generate plots: {e}")
-                    raise typer.Exit(1)
-
-        # Display results summary (order matters for test compatibility)
-        console.print("\n[green]Analysis complete![/green]")
         logger.success("Analysis completed successfully")
 
-        # Display coefficients table
+        # Log computed coefficients
         coeff_list = [float(c) for c in result.coefficients]
         zernikes_list = [float(c) for c in result.zernikes]
-        console.print(create_coefficients_table(coeff_list, zernikes_list))
+        print_coeffs(coeff_list, zernikes_list)
 
-        # Log metrics, ellipse parameters, and output locations
+        # Log global results
+        logger.info("Global results:")
+
+        logger.info(f"Raw WFE RMS: {result.rms(result.raw):.2f} nm")
+        logger.info(f"Fit WFE RMS: {result.rms(result.model):.2f} nm")
+        logger.info(f"Fit WFE RMS (-PTT): {result.rss(result.coefficients[3:]):.2f} nm")
         logger.info(
-            "Results:\n"
-            f"  Raw WFE RMS: {result.rms(result.raw):.2f}\n"
-            f"  Fit WFE RMS: {result.rms(result.model):.2f}\n"
-            f"  Fit WFE RMS (-PTT): {result.rss(result.coefficients[3:]):.2f}\n"
-            f"  Fit WFE RMS (-PTTF): {result.rss(result.coefficients[4:]):.2f}\n"
-            f"  Residual RMS: {result.rms(result.residual):.2f} nm\n"
-            f"  Residual PTP: {result.ptp(result.residual):.2f} nm\n"
-            "\nEllipse parameters:\n"
-            f"  Center: ({params.x0:.1f}, {params.y0:.1f})\n"
-            f"  Semi-axes: ({params.a:.1f}, {params.b:.1f})\n"
-            f"  Angle: {params.theta:.3f} rad"
+            f"Fit WFE RMS (-PTTF): {result.rss(result.coefficients[4:]):.2f} nm"
         )
+        logger.info(f"Residual RMS: {result.rms(result.residual):.2f} nm")
+        logger.info(f"Residual PTP: {result.ptp(result.residual):.2f} nm")
 
-        if config.generate_plots or config.save_coeffs:
-            outputs = []
-            if config.generate_plots:
-                outputs.append(f"  Plots: {output_dir}")
-            if config.save_coeffs:
-                outputs.append(
-                    f"  Coefficients: {output_dir}/polynomial_coefficients.json"
-                )
-            logger.info("Output files:\n" + "\n".join(outputs))
+        # Ellipse fit bookkeeping
+        logger.info("Ellipse parameters:")
+        logger.info(f"Center: ({params.x0:.1f}, {params.y0:.1f}) pixel")
+        logger.info(f"Semi-axes: ({params.a:.1f}, {params.b:.1f}) pixel")
+        logger.info(f"Angle: {params.theta:.3f} rad")
+
+        if config.generate_plots:
+            logger.info(f"Plots saved to: {output_dir}/")
+        if config.save_coeffs:
+            logger.info(
+                f"Coefficients saved to: {output_dir}/polynomial_coefficients.json"
+            )
 
     except typer.Exit:
         raise
-    except Exception as e:
-        logger.error(f"Unexpected error: {e}")
-        raise typer.Exit(1)
+    except Exception as exc:
+        logger.error(f"Unexpected error: {exc}")
+        raise typer.Exit(1) from exc
+
+    logger.log("ANNOUNCE", "Analysis ended.")
 
 
 # Create the Typer app
@@ -234,21 +224,36 @@ def callback(
     Wavefront Error Analysis Tools - Analyze and visualize wavefront error data.
 
     This tool provides functionality for analyzing wavefront error data using
-    (orthonormal) polynomial decomposition on elliptical apertures and generating visualization outputs.
+    (orthonormal) polynomial decomposition on elliptical apertures and generating
+    visualization outputs.
     """
     pass
 
 
 @app.command()
 def analyze(
-    input_file: Path = typer.Argument(
-        ..., exists=True, file_okay=True, dir_okay=False, help="Input WFE data file"
+    input_file: Path = typer.Option(
+        ...,
+        "--input-file",
+        "-i",
+        show_default=False,
+        help="Input WFE data file",
+        rich_help_panel="Required",
     ),
-    output_dir: Path = typer.Argument(
-        ..., file_okay=False, dir_okay=True, help="Output directory for results"
+    output_dir: Path = typer.Option(
+        ...,
+        "--output-dir",
+        "-o",
+        show_default=False,
+        help="Output directory for results",
+        rich_help_panel="Required",
     ),
     n_polynomials: int = typer.Option(
-        15, "--npolynomials", "-n", min=4, help="Number of polynomials"
+        15,
+        "--npolynomials",
+        "-n",
+        min=4,
+        help="Number of polynomials",
     ),
     plot_format: str = typer.Option(
         "png",
@@ -271,10 +276,23 @@ def analyze(
         None,
         "--format",
         "-f",
-        help="Specify the file format (e.g., 'zemax', 'codev'). If not provided, expects a simple .dat file.",
+        help="Specify the file format (e.g., 'zemax'). "
+        + "If not provided, expects a simple .dat file.",
     ),
 ) -> None:
     """Analyze WFE data and generate results."""
+    # Add loguru file handler for debug.log in output_dir
+    logger.add(
+        output_dir / "debug.log",
+        format=LOG_FORMAT,
+        level="DEBUG",
+        rotation="1 week",
+        retention="1 month",
+        compression="gz",
+        enqueue=True,
+        backtrace=True,
+        diagnose=True,
+    )
     run_analysis(
         input_file=input_file,
         output_dir=output_dir,
@@ -283,6 +301,62 @@ def analyze(
         save_coeffs=save_coeffs,
         no_plots=no_plots,
         file_format=file_format,
+    )
+
+
+@app.command("zmx-batch")
+def zmx_batch(
+    base_folder: str = typer.Option(
+        ...,
+        "--base-folder",
+        "-b",
+        help="Directory containing ZMX files.",
+        show_default=False,
+        rich_help_panel="Required",
+    ),
+    output_dir: Path = typer.Option(
+        ...,
+        "--output-dir",
+        "-o",
+        show_default=False,
+        help="Output directory for results",
+        rich_help_panel="Required",
+    ),
+    surface_name: str = typer.Option(
+        "EXPP",
+        "--surface-name",
+        "-s",
+        help="Surface name to look for.",
+        show_default=True,
+    ),
+    wavelength_um: Optional[float] = typer.Option(
+        None,
+        "--wavelength-um",
+        "-w",
+        help="Custom wavelength in micrometers to use.",
+        show_default=False,
+    ),
+) -> None:
+    """
+    Process all ZMX files in the specified directory.
+    """
+    # Add loguru file handler for debug.log in output_dir
+    logger.add(
+        str(Path(output_dir) / "debug.log"),
+        format=LOG_FORMAT,
+        level="DEBUG",
+        rotation="1 week",
+        retention="1 month",
+        compression="gz",
+        enqueue=True,
+        backtrace=True,
+        diagnose=True,
+    )
+    batch_process_zmx(
+        base_folder=base_folder,
+        output_dir=str(output_dir),
+        surface_name=surface_name,
+        wavelength_um=wavelength_um,
     )
 
 
