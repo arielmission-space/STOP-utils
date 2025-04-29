@@ -295,7 +295,7 @@ The generated HTML files will be in the `docs/build/html` directory. Open `docs/
       B --> C[Detect Elliptical Aperture]
       C --> D[Fit Orthonormal Polynomials]
       E --> F[Generate Results & Plots]
-      E --> G[Output Directory/Logs]
+      F --> G[Output Directory/Logs]
    ```
 
 2. Core Functions:
