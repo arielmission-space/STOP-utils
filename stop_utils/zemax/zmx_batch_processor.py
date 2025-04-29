@@ -30,9 +30,6 @@ def batch_process_zmx(
 
     logger.info(f"Found {len(zmx_files)} .zmx files to process.")
 
-    output_path = os.path.join(base_folder, output_dir)
-    os.makedirs(output_path, exist_ok=True)
-
     for i, zmx_file_path in enumerate(zmx_files):
         file_name = Path(zmx_file_path).stem
         logger.info(f"Processing file {i+1}/{len(zmx_files)}: {file_name}")
