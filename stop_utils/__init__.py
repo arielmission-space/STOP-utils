@@ -28,7 +28,7 @@ __pkg_name__ = __title__ = metadata.metadata(project)["Name"].upper()
 __version__ = metadata.version(project)
 __url__ = metadata.metadata(project)["Project-URL"]
 __author__ = metadata.metadata(project)["Author"]
-__license__ = metadata.metadata(project).get("License", None)
+__license__ = metadata.metadata(project)["License"]
 __copyright__ = f"2025-{date.today().year:d}, {__author__}"
 __summary__ = metadata.metadata(project)["Summary"]
 
@@ -50,16 +50,4 @@ logger.add(
     format=log_format,
     level="INFO",
     colorize=True,
-)
-
-# Add file handler for debug logs
-log_dir = Path.home() / ".stop-utils" / "logs"
-log_dir.mkdir(parents=True, exist_ok=True)
-logger.add(
-    log_dir / "debug.log",
-    format=log_format,
-    level="DEBUG",
-    rotation="1 week",
-    retention="1 month",
-    compression="gz",
 )
