@@ -48,5 +48,5 @@ def batch_process_zmx(
             logger.error(f"Error processing {file_name}: {str(e)}")
             continue
 
-    logger.info("\nAll files processed.")
+    logger.info("All files processed.")
     logger.log("ANNOUNCE", "Analysis ended.")
