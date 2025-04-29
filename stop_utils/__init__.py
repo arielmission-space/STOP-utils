@@ -34,20 +34,22 @@ __summary__ = metadata.metadata(project)["Summary"]
 
 
 # Configure loguru logger
-log_format = (
+LOG_FORMAT = (
     "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-    "<level>{level: <8}</level> | "
-    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+    "<level>{level:<10}</level> | "
+    "<cyan>{name:<30}</cyan>:<cyan>{function:<30}</cyan>:<cyan>{line:<10}</cyan>"
     "<level>{message}</level>"
 )
 
+# Add announce logger level
+logger.level("ANNOUNCE", no=100, color="<magenta>")
 # Remove default handler and add custom handlers
 logger.remove()
 
 # Add console handler with custom format
 logger.add(
     sys.stderr,
-    format=log_format,
+    format=LOG_FORMAT,
     level="INFO",
     colorize=True,
 )
