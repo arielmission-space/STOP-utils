@@ -3,7 +3,8 @@ from pathlib import Path
 from typing import Union
 
 import numpy as np
-from loguru import logger
+
+from . import logger
 
 
 def load_zemax_wfe(file_path: Union[str, Path]) -> np.ndarray:
