@@ -294,8 +294,8 @@ The generated HTML files will be in the `docs/build/html` directory. Open `docs/
       A[CLI/Input File] --> B[Load WFE Data]
       B --> C[Detect Elliptical Aperture]
       C --> D[Fit Orthonormal Polynomials]
-      E --> F[Generate Results & Plots]
-      F --> G[Output Directory/Logs]
+      D --> E[Generate Results & Plots]
+      E --> F[Output Directory/Logs]
    ```
 
 2. Core Functions:
