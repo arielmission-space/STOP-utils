@@ -118,7 +118,7 @@ Requirements:
 A dedicated CLI entry point is provided for batch processing Zemax files:
 
 ```bash
-stop-utils zmx-batch --base_folder /path/to/zemax/files --output-dir /path/to/output/dir --surface_name EXPP --wavelength_um 0.633
+stop-utils zmx-batch -b "C:\path\to\zemax\files" -o "C:\path\to\output\dir" -s "EXPP" -w 0.633
 ```
 
 This command processes all `.zmx` files in the specified folder, extracting wavefront maps for the given surface and wavelength. Output files are saved in the specified output directory.
