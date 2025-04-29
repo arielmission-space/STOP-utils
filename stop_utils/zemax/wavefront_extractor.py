@@ -104,7 +104,7 @@ def process_single_file(
         wfe_map = np.asarray(reshaped_data)
 
         # === Save to txt file
-        results.GetTextFile(f"{base_folder}\\{output_dir}\\{zemax_filename}.txt")
+        results.GetTextFile(f"{output_dir}\\{zemax_filename}.txt")
 
         # === Optional: create and save visualization
         plt.figure(figsize=(8, 6))
