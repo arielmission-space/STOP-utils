@@ -1,6 +1,7 @@
 # STOP-utils
 
-[![GitHub version](https://badge.fury.io/gh/arielmission-space%2Fstop-utils.svg)](https://badge.fury.io/gh/arielmission-space%2Fstop-utils)
+[![PyPI version](https://badge.fury.io/py/stop-utils.svg?icon=si%3Apython)](https://badge.fury.io/py/stop-utils)
+[![GitHub version](https://badge.fury.io/gh/arielmission-space%2FSTOP-utils.svg?icon=si%3Agithub)](https://badge.fury.io/gh/arielmission-space%2FSTOP-utils)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Documentation Status](https://readthedocs.org/projects/stop-utils/badge/?version=latest)](https://stop-utils.readthedocs.io/en/latest/?badge=latest)
 
@@ -125,10 +126,10 @@ This command processes all `.zmx` files in the specified folder, extracting wave
 
 **Options:**
 
-- `--base_folder`, `-b`: Directory containing `.zmx` files (required)
-- `--output_dir`, `-o`: Directory to save output files (required)
-- `--surface_name`, `-s`: Surface name to process (default: `EXPP`)
-- `--wavelength_um`, `-w`: Custom wavelength in micrometers
+- `--base-folder`, `-b`: Directory containing `.zmx` files (required)
+- `--output-dir`, `-o`: Directory to save output files (required)
+- `--surface-name`, `-s`: Surface name to process (default: `EXPP`)
+- `--wavelength-um`, `-w`: Custom wavelength in micrometers
 
 ## Module Descriptions
 
