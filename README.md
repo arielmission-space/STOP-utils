@@ -185,7 +185,7 @@ stop-utils analyze input_file output_dir/
 Supported input formats:
 
 - Raw WFE data files (`.dat`)
-- Zemax Wavefront Map exports (`.txt`) from the "Text" button in the Wavefront Map analysis window
+- Zemax Wavefront Map exports (`.txt`) from the "Text" button in the Wavefront Map analysis window or from `zmx-batch` (see above).
 
 Options:
 
