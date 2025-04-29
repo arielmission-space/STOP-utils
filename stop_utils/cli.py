@@ -6,7 +6,7 @@ from typing import List, Optional
 
 import typer
 
-from . import project, __version__, logger, LOG_FORMAT
+from . import LOG_FORMAT, __version__, logger, project
 from .types import AnalysisConfig, EllipticalParams
 from .visualization import generate_plots
 from .wfe_analysis import analyze_wfe_data
@@ -138,9 +138,7 @@ def run_analysis(
             try:
                 coeff_list = [float(c) for c in result.coefficients]
                 zernikes_list = [float(c) for c in result.zernikes]
-                save_coefficients(
-                    config.output_dir, coeff_list, zernikes_list, params
-                )
+                save_coefficients(config.output_dir, coeff_list, zernikes_list, params)
             except Exception as exc:
                 logger.error(f"Failed to save coefficients: {exc}")
                 raise typer.Exit(1) from exc
